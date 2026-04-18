@@ -1,4 +1,5 @@
 import { Bell, CircleQuestionMark, Home, Mail } from "lucide-react";
+import Link from "next/link";
 export default function Navbar() {
   return (
     <nav className="w-[90%] max-w-[900px] mx-auto my-5 bg-white/70 backdrop-blur-lg border border-green-700/20 rounded-full flex justify-between items-center pl-6 pr-2 py-2 shadow-sm">
@@ -33,11 +34,11 @@ export default function Navbar() {
            <CircleQuestionMark/>
           </button>
         <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
-          Login
+          <Link href="/Login">Login</Link>
         </button>
 
         <button className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full transition-colors ml-0.5 cursor-pointer">
-          Register
+          <Link href="/Signup">Register</Link>
         </button>
       </div>
     </nav>
