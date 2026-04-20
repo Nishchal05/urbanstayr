@@ -39,7 +39,9 @@ export default function Navbar() {
               {icon}
             </button>
           ))}
-
+          <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
+            <Link href="/Rent">Rent</Link>
+          </button>
           <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
             <Link href="/Login">Login</Link>
           </button>
