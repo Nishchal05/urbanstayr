@@ -1,31 +1,18 @@
-"use client"
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Rent() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const res = await fetch("/api/me");
-      const data = await res.json();
-
-      if (!data.loggedIn) {
-        router.push("/login"); // 🔥 redirect if not logged in
-      } else {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (loading) return <p>Checking auth...</p>;
+export default async function Rent() {
+  const cookieStore = await cookies();
+  const isloggedin = cookieStore.get("token")?.value;
+  
+  if (!isloggedin) {
+    redirect("/Login");
+  }
 
   return (
-    <section>
-      <h1>Welcome, you are logged in</h1>
+    <section className="w-[90%] max-w-[900px] mx-auto mt-10 p-8 bg-white border border-green-700/20 rounded-2xl shadow-sm text-center">
+      <h1 className="text-2xl font-bold text-green-900 mb-2">Welcome to the Rent Dashboard</h1>
+      <p className="text-gray-600">You are securely logged in.</p>
     </section>
   );
 }

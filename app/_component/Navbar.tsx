@@ -4,8 +4,21 @@ import { Bell, CircleQuestionMark, Home, Mail, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Navbar() {
+import { useRouter } from "next/navigation";
+import axios from "axios";
+
+export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/auth/logout");
+      window.location.reload();
+    } catch (err) {
+      console.error("Failed to log out", err);
+    }
+  };
 
   return (
     <>
@@ -42,12 +55,23 @@ export default function Navbar() {
           <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
             <Link href="/Rent">Rent</Link>
           </button>
-          <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
-            <Link href="/Login">Login</Link>
-          </button>
-          <button className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full transition-colors ml-0.5 cursor-pointer">
-            <Link href="/Signup">Register</Link>
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium text-red-600 border border-red-700/40 hover:bg-red-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
+                <Link href="/Login">Login</Link>
+              </button>
+              <button className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full transition-colors ml-0.5 cursor-pointer">
+                <Link href="/Signup">Register</Link>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile: icon buttons + hamburger */}
@@ -79,20 +103,34 @@ export default function Navbar() {
 
             <div className="h-px bg-gray-100 my-1" />
 
-            <Link
-              href="/Login"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-2.5 rounded-full transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/Signup"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-center text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-2.5 rounded-full transition-colors"
-            >
-              Register
-            </Link>
+            {isLoggedIn ? (
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-5 py-2.5 rounded-full transition-colors w-full"
+              >
+                Logout
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/Login"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-2.5 rounded-full transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/Signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-2.5 rounded-full transition-colors"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

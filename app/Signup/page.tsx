@@ -2,7 +2,9 @@
 
 import { Home } from "lucide-react";
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 type Role = "partner" | "client" | "";
 
 interface FormData {
@@ -22,20 +24,32 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
 
-  const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> ) => { console.log(form); setForm({ ...form, [e.target.name]: e.target.value }); 
-};
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
+
+  const handleChange = ( e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> ) => { 
+    setForm({ ...form, [e.target.name]: e.target.value }); 
+    setErrorMsg("");
+  };
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
-    try{
-      const response=axios.post("api/auth/Signup",{
-        form
-      });
-      console.log("response",response);
-    }catch(error){
-      console.log(error);
+    setIsLoading(true);
+    setErrorMsg("");
+    try {
+      const response = await axios.post("/api/auth/Signup", { form });
+      console.log("Signup successful:", response.data);
+      window.location.href = "/";
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setErrorMsg(error.response?.data?.error || "An error occurred during signup.");
+      } else {
+        setErrorMsg("Failed to connect to the server.");
+      }
+    } finally {
+      setIsLoading(false);
     }
-    console.log("Form submitted:",form);
   };
 
   const inputClass = (field: string) =>
@@ -86,6 +100,12 @@ export default function SignupPage() {
             <h2 className="text-xl font-bold text-gray-900">Create your account</h2>
             <p className="text-sm text-gray-500 mt-0.5">Join thousands finding &amp; listing spaces</p>
           </div>
+
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm text-center">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -239,12 +259,15 @@ export default function SignupPage() {
             {/* Submit */}
             <button
               type="submit"
-              className="group w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-semibold py-3 rounded-lg text-sm transition-colors duration-200 flex items-center justify-center gap-2 mt-1"
+              disabled={isLoading}
+              className="group w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg text-sm transition-colors duration-200 flex items-center justify-center gap-2 mt-1"
              >
-              Create Account
-              <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              {isLoading ? "Creating Account..." : "Create Account"}
+              {!isLoading && (
+                <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              )}
             </button>
           </form>
 

@@ -13,7 +13,7 @@ export async function GET () {
   return Response.json({
     loggedIn: true,
     user: {
-      role: "client", // or partner
+      role: "client",
     },
   });
 }
