@@ -1,9 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-secret-key-min-32-chars'
-);
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined");
+}
+
+const secret = new TextEncoder().encode(JWT_SECRET);
 
 export async function createToken(payload: any) {
   return await new SignJWT(payload)
@@ -17,7 +21,7 @@ export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, secret);
     return payload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

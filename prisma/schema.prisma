@@ -13,10 +13,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  role      String   @default("client")
-  createdAt DateTime @default(now())
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  name         String?
+  password     String
+  role         String     @default("client")
+
+  // Subscription (nullable initially)
+  subscription String?    
+
+  // Relation: One user can have many properties
+  properties   Property[]
+
+  createdAt    DateTime   @default(now())
+}
+
+model Property {
+  id                Int      @id @default(autoincrement())
+  name              String
+  sector            String?
+  area              String?
+  street            String?
+  phone             String?
+  location          String?
+
+  // Room Features
+  singleAC          Boolean  @default(false)
+  singleCooler      Boolean  @default(false)
+  singleTable       Boolean  @default(false)
+
+  doubleAC          Boolean  @default(false)
+  doubleCooler      Boolean  @default(false)
+  doubleTable       Boolean  @default(false)
+
+  tripleAC          Boolean  @default(false)
+  tripleCooler      Boolean  @default(false)
+  tripleTable       Boolean  @default(false)
+  tripleFan         Boolean  @default(false)
+
+  // Washroom
+  attachedWashroom  Boolean  @default(false)
+  sharingWashroom   String?
+
+  // Food
+  breakfast         Boolean  @default(false)
+  lunch             Boolean  @default(false)
+  dinner            Boolean  @default(false)
+  menu              Json?
+
+  // Amenities
+  housekeeping      Boolean  @default(false)
+  washingMachine    Boolean  @default(false)
+  parking           Boolean  @default(false)
+  kitchen           Boolean  @default(false)
+
+  // Photos
+  photoRooms        Json?
+  photoWashroom     String?
+  photoKitchen      String?
+  photoProperty     String?
+  photoWashing      String?
+  photoParking      String?
+  photoDining       String?
+  photoTerrace      String?
+
+  // Pricing
+  rent              Int
+  electricity       Int
+
+  // Type
+  propertyType      String
+  listingType       String
+
+  // 🔥 Relation (important)
+  userId            Int
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }

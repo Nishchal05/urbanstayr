@@ -399,7 +399,7 @@ export default function Rent() {
     switch (step) {
       case 0:
         return (
-          <div className="space-y-4">
+          <div className="space-y-4 text-black">
             <Section title="Property / PG Details">
               <Field label="Property / PG Name" placeholder="e.g. Green Heights PG" value={form.name} onChange={setF("name")} required />
             </Section>
@@ -547,7 +547,7 @@ export default function Rent() {
 
       case 6:
         return (
-          <div className="space-y-5">
+          <div className="space-y-5 text-black">
             <Section title="Pricing Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -597,7 +597,7 @@ export default function Rent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-white to-green-50 text-black">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <button
           onClick={() => { if (step > 0) setStep((s) => s - 1); else setPropertyType(null); }}
