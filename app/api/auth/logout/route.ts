@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 export async function POST() {
+  // trigger hot reload
   const response = NextResponse.json({ message: 'Logged out successfully' });
   
   response.cookies.set('token', '', {

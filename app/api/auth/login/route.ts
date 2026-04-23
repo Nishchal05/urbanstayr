@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { createToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-
+export const runtime = "nodejs"
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
