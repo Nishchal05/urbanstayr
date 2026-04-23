@@ -53,7 +53,7 @@ export default function Navbar({ isLoggedIn = false }: { isLoggedIn?: boolean })
             </button>
           ))}
           <button className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full transition-colors ml-1 cursor-pointer">
-            <Link href="/Rent">Rent</Link>
+            <Link href="/Rent">Rent your property</Link>
           </button>
           {isLoggedIn ? (
             <button
