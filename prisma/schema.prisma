@@ -21,7 +21,8 @@ model User {
 
   // Subscription (nullable initially)
   subscription String?    
-
+  subscriptionstarting DateTime?
+  subscriptionending DateTime?
   // Relation: One user can have many properties
   properties   Property[]
 

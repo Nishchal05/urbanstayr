@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PlacesInput from "../_component/Input";
-
+import { useAuth } from "../context/AuthContext";
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type FormState = {
   name: string; sector: string; area: string; street: string; phone: string;
@@ -23,6 +23,30 @@ type StringKeys  = { [K in keyof FormState]: FormState[K] extends string  ? K : 
 type FileKeys    = { [K in keyof FormState]: FormState[K] extends File | null ? K : never }[keyof FormState];
 
 type MainOption = "search" | "sell" | "buy" | "pg";
+type PlanId = "free" | "premium" | "pro";
+
+interface Plan {
+  id: PlanId; name: string; duration: string; price: string;
+  priceNote: string; badge?: string; features: string[];
+}
+
+const PLANS: Plan[] = [
+  {
+    id: "free", name: "Starter", duration: "2 Months", price: "₹0",
+    priceNote: "Free forever",
+    features: ["1 Property Listing", "Email support"],
+  },
+  {
+    id: "premium", name: "Premium", duration: "6 Months", price: "₹1,000",
+    priceNote: "per month", badge: "Most Popular",
+    features: ["Unlimited listings", "Priority placement", "Analytics dashboard", "24/7 support"],
+  },
+  {
+    id: "pro", name: "Pro", duration: "9 Months", price: "₹900",
+    priceNote: "per month", badge: "Best Value",
+    features: ["Everything in Premium", "Featured badge", "Dedicated manager", "Social media boost"],
+  },
+];
 
 // ─── SVG Icons ─────────────────────────────────────────────────────────────────
 const SearchIcon = () => (
@@ -60,6 +84,11 @@ const UploadIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M12 4v12M8 8l4-4 4 4" />
   </svg>
 );
+const StarIcon = () => (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 const MAIN_OPTIONS: { id: MainOption; label: string; icon: React.ReactElement; desc: string }[] = [
@@ -71,22 +100,14 @@ const MAIN_OPTIONS: { id: MainOption; label: string; icon: React.ReactElement; d
 
 const PROPERTY_TYPES = ["1 BHK", "2 BHK", "1 RK", "House", "Land", "Villa", "Shop/Commercial", "Flat"];
 const FORM_STEPS = ["Basic Info", "Room Details", "Washroom", "Food", "Services", "Photos", "Pricing"];
+const LAST_FORM_STEP = FORM_STEPS.length - 1; // index 6
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
-interface CheckboxProps {
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}
+interface CheckboxProps { label: string; checked: boolean; onChange: () => void; }
 function Checkbox({ label, checked, onChange }: CheckboxProps) {
   return (
     <label className="flex items-center gap-2 cursor-pointer group select-none">
-      <span
-        onClick={onChange}
-        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-          checked ? "bg-green-400 border-green-400" : "border-gray-300 group-hover:border-green-400"
-        }`}
-      >
+      <span onClick={onChange} className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${checked ? "bg-green-400 border-green-400" : "border-gray-300 group-hover:border-green-400"}`}>
         {checked && <CheckIcon />}
       </span>
       <span className="text-sm text-gray-700">{label}</span>
@@ -101,20 +122,12 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
       {steps.map((stepLabel, i) => (
         <div key={i} className="flex items-center">
           <div className="flex flex-col items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 ${
-              i < current ? "bg-green-400 border-green-400 text-white"
-              : i === current ? "bg-white border-green-400 text-green-600"
-              : "bg-white border-gray-200 text-gray-400"
-            }`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 ${i < current ? "bg-green-400 border-green-400 text-white" : i === current ? "bg-white border-green-400 text-green-600" : "bg-white border-gray-200 text-gray-400"}`}>
               {i < current ? <CheckIcon /> : i + 1}
             </div>
-            <span className={`text-[10px] mt-1 whitespace-nowrap font-medium ${i === current ? "text-green-600" : "text-gray-400"}`}>
-              {stepLabel}
-            </span>
+            <span className={`text-[10px] mt-1 whitespace-nowrap font-medium ${i === current ? "text-green-600" : "text-gray-400"}`}>{stepLabel}</span>
           </div>
-          {i < steps.length - 1 && (
-            <div className={`h-0.5 w-6 sm:w-10 mx-1 mb-4 transition-all duration-300 ${i < current ? "bg-green-400" : "bg-gray-200"}`} />
-          )}
+          {i < steps.length - 1 && <div className={`h-0.5 w-6 sm:w-10 mx-1 mb-4 transition-all duration-300 ${i < current ? "bg-green-400" : "bg-gray-200"}`} />}
         </div>
       ))}
     </div>
@@ -126,9 +139,7 @@ function Section({ title, children }: SectionProps) {
   return (
     <div className="mb-6">
       <h3 className="text-sm font-semibold text-green-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-        <span className="h-px flex-1 bg-green-100" />
-        {title}
-        <span className="h-px flex-1 bg-green-100" />
+        <span className="h-px flex-1 bg-green-100" />{title}<span className="h-px flex-1 bg-green-100" />
       </h3>
       <div className="space-y-3">{children}</div>
     </div>
@@ -136,47 +147,77 @@ function Section({ title, children }: SectionProps) {
 }
 
 interface FieldProps {
-  label: string;
-  type?: string;
-  placeholder?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  required?: boolean;
+  label: string; type?: string; placeholder?: string;
+  value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; required?: boolean;
 }
 function Field({ label, type = "text", placeholder, value, onChange, required = false }: FieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label} {required && <span className="text-green-500">*</span>}
-      </label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition bg-white placeholder:text-gray-400"
-      />
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-green-500">*</span>}</label>
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange}
+        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition bg-white placeholder:text-gray-400" />
     </div>
   );
 }
 
-interface PhotoUploadProps {
-  label: string;
-  value: File | null;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+interface PhotoUploadProps { label: string; value: File | null; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }
 function PhotoUpload({ label, value, onChange }: PhotoUploadProps) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
       <label className="flex flex-col items-center justify-center border-2 border-dashed border-green-200 rounded-xl py-4 px-3 cursor-pointer hover:border-green-400 hover:bg-green-50 transition-all duration-200 group">
         <UploadIcon />
-        <span className="text-xs text-gray-400 mt-1 group-hover:text-green-500 transition-colors">
-          {value ? value.name : "Click to upload"}
-        </span>
+        <span className="text-xs text-gray-400 mt-1 group-hover:text-green-500 transition-colors">{value ? value.name : "Click to upload"}</span>
         <input type="file" accept="image/*" className="hidden" onChange={onChange} />
       </label>
     </div>
+  );
+}
+
+// ─── Plan Card ─────────────────────────────────────────────────────────────────
+interface PlanCardProps { plan: Plan; selected: boolean; onSelect: () => void; }
+function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
+  const isPopular = plan.id === "premium";
+  return (
+    <button
+      onClick={onSelect}
+      className={`relative w-full text-left rounded-2xl border-2 p-5 transition-all duration-300 ${
+        selected
+          ? "border-green-400 bg-green-50 shadow-lg shadow-green-100"
+          : "border-gray-200 bg-white hover:border-green-300 hover:shadow-md"
+      }`}
+    >
+      {plan.badge && (
+        <span className={`absolute -top-3 left-4 text-[10px] font-bold px-3 py-1 rounded-full ${isPopular ? "bg-green-400 text-white" : "bg-amber-400 text-white"}`}>
+          {plan.badge}
+        </span>
+      )}
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <p className="font-black text-gray-900 text-base">{plan.name}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{plan.duration}</p>
+        </div>
+        <div className="text-right">
+          <p className={`text-xl font-black ${selected ? "text-green-600" : "text-gray-800"}`}>{plan.price}</p>
+          <p className="text-[10px] text-gray-400">{plan.priceNote}</p>
+        </div>
+      </div>
+      <ul className="space-y-1.5 mb-4">
+        {plan.features.map((f) => (
+          <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${selected ? "bg-green-400" : "bg-gray-100"}`}>
+              <svg className={`w-2.5 h-2.5 ${selected ? "text-white" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+            {f}
+          </li>
+        ))}
+      </ul>
+      <div className={`w-full py-2 rounded-xl text-xs font-bold text-center transition-all ${selected ? "bg-green-400 text-white" : "bg-gray-100 text-gray-500"}`}>
+        {selected ? "✓ Selected" : "Select Plan"}
+      </div>
+    </button>
   );
 }
 
@@ -185,9 +226,20 @@ export default function Rent() {
   const [mainOption, setMainOption]     = useState<MainOption | null>(null);
   const [propertyType, setPropertyType] = useState<string | null>(null);
   const [step, setStep]                 = useState(0);
+
+  // "showPlanScreen" = user finished form but has no sub yet → show plan picker
+  const [showPlanScreen, setShowPlanScreen] = useState(false);
+
   const [submitting, setSubmitting]     = useState(false);
   const [submitted, setSubmitted]       = useState(false);
   const [error, setError]               = useState("");
+
+  // Subscription
+  const [subLoading, setSubLoading]         = useState(true);
+  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
+  const [selectedPlan, setSelectedPlan]     = useState<PlanId | null>(null);
+  const [planSubmitting, setPlanSubmitting] = useState(false);
+  const [planError, setPlanError]           = useState("");
 
   const [form, setForm] = useState<FormState>({
     name: "", sector: "", area: "", street: "", phone: "", location: "",
@@ -202,17 +254,43 @@ export default function Rent() {
     photoDining: null, photoTerrace: null,
     rent: "", electricity: "",
   });
+  const { user } = useAuth();
+  if(!user) {
+    window.location.href = "/Login";
+  }
+  // ── Fetch subscription status on mount ──────────────────────────────────────
+  useEffect(() => {
+    const fetchSub = async () => {
+      try {
+        const res = await fetch("/api/partner/subscription");
+        const data = await res.json();
+        setHasSubscription(!!(data?.subscription));
+      } catch {
+        setHasSubscription(false);
+      } finally {
+        setSubLoading(false);
+      }
+    };
+    fetchSub();
+  }, []);
 
-  const setF = (key: StringKeys) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const setF    = (key: StringKeys)  => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  const toggleF = (key: BooleanKeys) => () => setForm((f) => ({ ...f, [key]: !f[key] }));
+  const setFile = (key: FileKeys)    => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [key]: e.target.files?.[0] ?? null }));
 
-  const toggleF = (key: BooleanKeys) => () =>
-    setForm((f) => ({ ...f, [key]: !f[key] }));
+  // Called from last form step's "Submit" button
+  const handleFormComplete = () => {
+    if (!hasSubscription) {
+      // Show plan selection screen (form data is already saved in state)
+      setShowPlanScreen(true);
+    } else {
+      // Already subscribed → go straight to API
+      submitProperty();
+    }
+  };
 
-  const setFile = (key: FileKeys) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.files?.[0] ?? null }));
-
-  const handleSubmit = async () => {
+  // Called after plan is activated (or if already subscribed)
+  const submitProperty = async () => {
     setSubmitting(true);
     setError("");
     try {
@@ -223,10 +301,33 @@ export default function Rent() {
       });
       if (!res.ok) throw new Error("Submission failed");
       setSubmitted(true);
+      setShowPlanScreen(false);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Activate plan then submit property
+  const handlePlanAndSubmit = async () => {
+    if (!selectedPlan) { setPlanError("Please select a plan to continue."); return; }
+    setPlanSubmitting(true);
+    setPlanError("");
+    try {
+      const res = await fetch("/api/partner/subscription", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: selectedPlan }),
+      });
+      if (!res.ok) throw new Error("Failed to set subscription");
+      setHasSubscription(true);
+      // Now submit the property
+      await submitProperty();
+    } catch {
+      setPlanError("Could not activate plan. Please try again.");
+    } finally {
+      setPlanSubmitting(false);
     }
   };
 
@@ -254,6 +355,21 @@ export default function Rent() {
     { key: "photoTerrace",  lbl: "Terrace Space" },
   ];
 
+  // ── Loading ──────────────────────────────────────────────────────────────────
+  if (subLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="w-8 h-8 animate-spin text-green-400" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm text-gray-400 font-medium">Checking your account...</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Success Screen ───────────────────────────────────────────────────────────
   if (submitted) {
     return (
@@ -267,12 +383,77 @@ export default function Rent() {
           <h2 className="text-2xl font-bold text-green-900">Property Listed!</h2>
           <p className="text-gray-500 text-sm">Submitted successfully. Our team will review and publish it shortly.</p>
           <button
-            onClick={() => { setSubmitted(false); setMainOption(null); setPropertyType(null); setStep(0); }}
+            onClick={() => { setSubmitted(false); setMainOption(null); setPropertyType(null); setStep(0); setShowPlanScreen(false); }}
             className="mt-4 px-6 py-2.5 bg-green-400 text-white rounded-xl font-semibold hover:bg-green-500 transition"
           >
             List Another Property
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // ── Plan Selection Screen (shown AFTER form is complete) ─────────────────────
+  if (showPlanScreen) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 text-black">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+          {/* Back to form */}
+          <button
+            onClick={() => setShowPlanScreen(false)}
+            className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline"
+          >
+            ← Back to Form
+          </button>
+
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 text-green-700 text-xs font-semibold mb-4">
+              <StarIcon /> One Last Step
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 mb-2">Choose Your Plan</h2>
+            <p className="text-gray-400 text-sm max-w-sm mx-auto">
+              Your listing is ready! Select a plan to publish it. You can upgrade anytime.
+            </p>
+          </div>
+
+          {/* Plan Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8 mt-6">
+            {PLANS.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                selected={selectedPlan === plan.id}
+                onSelect={() => setSelectedPlan(plan.id)}
+              />
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-gray-400 mb-6">
+            All plans include secure listing, partner dashboard access, and lead management.
+          </p>
+
+          {planError && <p className="text-sm text-red-500 text-center mb-4">{planError}</p>}
+          {error     && <p className="text-sm text-red-500 text-center mb-4">{error}</p>}
+
+          <button
+            onClick={handlePlanAndSubmit}
+            disabled={planSubmitting || submitting || !selectedPlan}
+            className="w-full bg-green-400 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
+          >
+            {(planSubmitting || submitting) ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                {planSubmitting ? "Activating Plan..." : "Submitting Property..."}
+              </>
+            ) : (
+              <>Activate Plan & Submit Listing <ChevronRightIcon /></>
+            )}
+          </button>
+        </main>
       </div>
     );
   }
@@ -288,8 +469,7 @@ export default function Rent() {
               Live Platform
             </div>
             <h1 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight mb-4">
-              Your Property,<br />
-              <span className="text-green-400">Your Way.</span>
+              Your Property,<br /><span className="text-green-400">Your Way.</span>
             </h1>
             <p className="text-gray-500 max-w-md mx-auto text-base leading-relaxed">
               Search, buy, sell or list your PG — everything in one professional platform.
@@ -298,19 +478,14 @@ export default function Rent() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-16">
             {MAIN_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setMainOption(opt.id)}
-                className="group relative bg-white border-2 border-gray-100 hover:border-green-400 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-green-100 hover:-translate-y-1"
-              >
+              <button key={opt.id} onClick={() => setMainOption(opt.id)}
+                className="group relative bg-white border-2 border-gray-100 hover:border-green-400 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-green-100 hover:-translate-y-1">
                 <div className="w-12 h-12 bg-green-50 group-hover:bg-green-400 rounded-xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 text-green-500 group-hover:text-white">
                   {opt.icon}
                 </div>
                 <p className="font-bold text-gray-900 text-sm mb-1">{opt.label}</p>
                 <p className="text-xs text-gray-400">{opt.desc}</p>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-green-400">
-                  <ChevronRightIcon />
-                </div>
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-green-400"><ChevronRightIcon /></div>
               </button>
             ))}
           </div>
@@ -331,27 +506,19 @@ export default function Rent() {
   // ── Property Type Selection ──────────────────────────────────────────────────
   if ((mainOption === "sell" || mainOption === "buy" || mainOption === "pg") && !propertyType) {
     const isPG = mainOption === "pg";
-    const types = isPG
-      ? ["Single Room", "Double Sharing", "Triple Sharing", "Full Hostel"]
-      : PROPERTY_TYPES;
-
+    const types = isPG ? ["Single Room", "Double Sharing", "Triple Sharing", "Full Hostel"] : PROPERTY_TYPES;
     return (
       <div className="min-h-screen bg-gradient-to-br from-white to-green-50 p-6">
         <div className="max-w-2xl mx-auto">
-          <button onClick={() => setMainOption(null)} className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline">
-            ← Back
-          </button>
+          <button onClick={() => setMainOption(null)} className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline">← Back</button>
           <h2 className="text-3xl font-black text-gray-900 mb-2">
             {isPG ? "Select PG / Hostel Type" : `Select Property Type to ${mainOption === "sell" ? "Sell" : "Buy"}`}
           </h2>
           <p className="text-gray-400 text-sm mb-8">Choose the type that best describes your property</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {types.map((t) => (
-              <button
-                key={t}
-                onClick={() => setPropertyType(t)}
-                className="group border-2 border-gray-100 hover:border-green-400 bg-white rounded-2xl p-5 text-left transition-all duration-200 hover:shadow-lg hover:shadow-green-100 hover:-translate-y-0.5"
-              >
+              <button key={t} onClick={() => setPropertyType(t)}
+                className="group border-2 border-gray-100 hover:border-green-400 bg-white rounded-2xl p-5 text-left transition-all duration-200 hover:shadow-lg hover:shadow-green-100 hover:-translate-y-0.5">
                 <div className="w-9 h-9 bg-green-50 group-hover:bg-green-400 rounded-xl flex items-center justify-center mb-3 transition-all duration-200 text-green-500 group-hover:text-white">
                   <BuildingIcon />
                 </div>
@@ -378,9 +545,7 @@ export default function Rent() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {PROPERTY_TYPES.map((t) => (
-                <button key={t} className="border border-gray-200 hover:border-green-400 hover:bg-green-50 rounded-xl py-2.5 px-4 text-sm font-medium text-gray-700 transition-all duration-200">
-                  {t}
-                </button>
+                <button key={t} className="border border-gray-200 hover:border-green-400 hover:bg-green-50 rounded-xl py-2.5 px-4 text-sm font-medium text-gray-700 transition-all duration-200">{t}</button>
               ))}
             </div>
             <button className="w-full bg-green-400 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
@@ -420,7 +585,7 @@ export default function Rent() {
               </div>
             </Section>
             <Section title="Contact">
-              <Field label="Contact Number" type="tel" placeholder="+## ##### #####" value={form.phone} onChange={setF("phone")} required />
+              <Field label="Contact Number" type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={setF("phone")} required />
             </Section>
           </div>
         );
@@ -464,12 +629,8 @@ export default function Rent() {
             <Section title="Sharing Type">
               {(["Single", "Double", "Triple"] as const).map((t) => (
                 <label key={t} className="flex items-center gap-3 cursor-pointer group">
-                  <span
-                    onClick={() => setForm((f) => ({ ...f, sharingWashroom: t }))}
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                      form.sharingWashroom === t ? "border-green-400 bg-green-400" : "border-gray-300"
-                    }`}
-                  >
+                  <span onClick={() => setForm((f) => ({ ...f, sharingWashroom: t }))}
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${form.sharingWashroom === t ? "border-green-400 bg-green-400" : "border-gray-300"}`}>
                     {form.sharingWashroom === t && <span className="w-2 h-2 rounded-full bg-white" />}
                   </span>
                   <span className="text-sm text-gray-700">{t} Sharing</span>
@@ -485,13 +646,8 @@ export default function Rent() {
             <Section title="Meals Provided">
               <div className="grid grid-cols-3 gap-3">
                 {mealItems.map(({ key, lbl }) => (
-                  <button
-                    key={key}
-                    onClick={toggleF(key)}
-                    className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${
-                      form[key] ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-200"
-                    }`}
-                  >
+                  <button key={key} onClick={toggleF(key)}
+                    className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${form[key] ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-200"}`}>
                     {lbl}
                   </button>
                 ))}
@@ -514,16 +670,9 @@ export default function Rent() {
             <Section title="Available Services">
               <div className="grid grid-cols-2 gap-4">
                 {serviceItems.map(({ key, lbl }) => (
-                  <button
-                    key={key}
-                    onClick={toggleF(key)}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${
-                      form[key] ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-green-200"
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${form[key] ? "bg-green-400" : "bg-gray-100"}`}>
-                      <CheckIcon />
-                    </div>
+                  <button key={key} onClick={toggleF(key)}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${form[key] ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-green-200"}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${form[key] ? "bg-green-400" : "bg-gray-100"}`}><CheckIcon /></div>
                     <span className={`text-sm font-semibold ${form[key] ? "text-green-700" : "text-gray-600"}`}>{lbl}</span>
                   </button>
                 ))}
@@ -551,31 +700,19 @@ export default function Rent() {
             <Section title="Pricing Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Monthly Rent <span className="text-green-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent <span className="text-green-500">*</span></label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      placeholder="8000"
-                      value={form.rent}
-                      onChange={setF("rent")}
-                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition"
-                    />
+                    <input type="number" placeholder="8000" value={form.rent} onChange={setF("rent")}
+                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Electricity per Unit</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
-                    <input
-                      type="number"
-                      placeholder="8"
-                      value={form.electricity}
-                      onChange={setF("electricity")}
-                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition"
-                    />
+                    <input type="number" placeholder="8" value={form.electricity} onChange={setF("electricity")}
+                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition" />
                   </div>
                 </div>
               </div>
@@ -587,6 +724,12 @@ export default function Rent() {
               <div className="flex justify-between text-sm"><span className="text-gray-500">Location</span><span className="font-semibold text-gray-800">{form.location || [form.sector, form.area].filter(Boolean).join(", ") || "—"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-500">Monthly Rent</span><span className="font-semibold text-green-600">₹{form.rent || "—"}</span></div>
             </div>
+            {/* Hint only shown if no subscription */}
+            {!hasSubscription && (
+              <p className="text-xs text-center text-gray-400">
+                You'll choose a subscription plan on the next screen before publishing.
+              </p>
+            )}
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           </div>
         );
@@ -607,20 +750,16 @@ export default function Rent() {
         </button>
 
         <div className="mb-6">
-          <h2 className="text-2xl font-black text-gray-900">
-            {step === 0 ? "Basic Information" : FORM_STEPS[step]}
-          </h2>
+          <h2 className="text-2xl font-black text-gray-900">{step === 0 ? "Basic Information" : FORM_STEPS[step]}</h2>
           <p className="text-sm text-gray-400 mt-1">Step {step + 1} of {totalSteps}</p>
         </div>
 
         <StepIndicator steps={FORM_STEPS} current={step} />
 
-        <div className="bg-white border border-green-100 rounded-2xl p-6 shadow-sm">
-          {renderStep()}
-        </div>
+        <div className="bg-white border border-green-100 rounded-2xl p-6 shadow-sm">{renderStep()}</div>
 
         <div className="flex gap-3 mt-6">
-          {step < totalSteps - 1 ? (
+          {step < LAST_FORM_STEP ? (
             <button
               onClick={() => setStep((s) => s + 1)}
               className="flex-1 bg-green-400 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
@@ -628,8 +767,9 @@ export default function Rent() {
               Continue <ChevronRightIcon />
             </button>
           ) : (
+            // Last step button — behaviour differs based on subscription status
             <button
-              onClick={handleSubmit}
+              onClick={handleFormComplete}
               disabled={submitting}
               className="flex-1 bg-green-400 hover:bg-green-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
             >
@@ -641,8 +781,10 @@ export default function Rent() {
                   </svg>
                   Submitting...
                 </>
-              ) : (
+              ) : hasSubscription ? (
                 <>Submit Property <CheckIcon /></>
+              ) : (
+                <>Review & Choose Plan <ChevronRightIcon /></>
               )}
             </button>
           )}
