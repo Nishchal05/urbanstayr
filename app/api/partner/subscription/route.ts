@@ -29,10 +29,8 @@ export async function GET() {
     const id = await getUserId();
 
     if (!id) {
-      console.log(id);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const user = await prisma.user.findFirst({
       where: { id },
       select: { subscription: true },

@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,84 +9,104 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id           Int        @id @default(autoincrement())
-  email        String     @unique
-  name         String?
-  password     String
-  role         String     @default("client")
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  password String
+  role  String  @default("client")
 
-  // Subscription (nullable initially)
-  subscription String?    
+  subscription         String?
   subscriptionstarting DateTime?
-  subscriptionending DateTime?
-  // Relation: One user can have many properties
-  properties   Property[]
+  subscriptionending   DateTime?
 
-  createdAt    DateTime   @default(now())
+  properties Property[]
+  createdAt  DateTime @default(now())
 }
 
 model Property {
-  id                Int      @id @default(autoincrement())
-  name              String
-  sector            String?
-  area              String?
-  street            String?
-  phone             String?
-  location          String?
+  id     Int    @id @default(autoincrement())
+  name   String
+  sector String?
+  area   String?
+  street String?
+  phone  String?
+  location String?
+
+  // 📍 Geo coordinates for location-based filtering
+  latitude  Float?
+  longitude Float?
 
   // Room Features
-  singleAC          Boolean  @default(false)
-  singleCooler      Boolean  @default(false)
-  singleTable       Boolean  @default(false)
-
-  doubleAC          Boolean  @default(false)
-  doubleCooler      Boolean  @default(false)
-  doubleTable       Boolean  @default(false)
-
-  tripleAC          Boolean  @default(false)
-  tripleCooler      Boolean  @default(false)
-  tripleTable       Boolean  @default(false)
-  tripleFan         Boolean  @default(false)
+  singleAC     Boolean @default(false)
+  singleCooler Boolean @default(false)
+  singleTable  Boolean @default(false)
+  doubleAC     Boolean @default(false)
+  doubleCooler Boolean @default(false)
+  doubleTable  Boolean @default(false)
+  tripleAC     Boolean @default(false)
+  tripleCooler Boolean @default(false)
+  tripleTable  Boolean @default(false)
+  tripleFan    Boolean @default(false)
 
   // Washroom
-  attachedWashroom  Boolean  @default(false)
-  sharingWashroom   String?
+  attachedWashroom Boolean @default(false)
+  sharingWashroom  String?
 
   // Food
-  breakfast         Boolean  @default(false)
-  lunch             Boolean  @default(false)
-  dinner            Boolean  @default(false)
-  menu              Json?
+  breakfast Boolean @default(false)
+  lunch     Boolean @default(false)
+  dinner    Boolean @default(false)
+  menu      Json?
 
   // Amenities
-  housekeeping      Boolean  @default(false)
-  washingMachine    Boolean  @default(false)
-  parking           Boolean  @default(false)
-  kitchen           Boolean  @default(false)
+  housekeeping   Boolean @default(false)
+  washingMachine Boolean @default(false)
+  parking        Boolean @default(false)
+  kitchen        Boolean @default(false)
 
   // Photos
-  photoRooms        Json?
-  photoWashroom     String?
-  photoKitchen      String?
-  photoProperty     String?
-  photoWashing      String?
-  photoParking      String?
-  photoDining       String?
-  photoTerrace      String?
+  photoRooms    Json?
+  photoWashroom String?
+  photoKitchen  String?
+  photoProperty String?
+  photoWashing  String?
+  photoParking  String?
+  photoDining   String?
+  photoTerrace  String?
 
   // Pricing
-  rent              Int
-  electricity       Int
+  rent        Int
+  electricity Int
 
   // Type
-  propertyType      String
-  listingType       String
+  propertyType String
+  listingType  String
 
-  // 🔥 Relation (important)
-  userId            Int
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // 📊 SEO & Analytics
+  clickCount       Int      @default(0)
+  impressionCount  Int      @default(0)
+  seoScore         Int      @default(0)
+  lastClickedAt    DateTime?
+  lastImpressionAt DateTime?
+  seoLastUpdatedAt DateTime? // tracks when score was last recalculated
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  // 🚀 Boost system
+  isBoosted        Boolean   @default(false)
+  boostStartedAt   DateTime?
+  boostEndsAt      DateTime? // set to now() + 7 days when boosted
+  boostedSeoScore  Int?      // stores the inflated score during boost
+  boostMultiplier  Float     @default(1.0) // e.g. 1.5 = 50% boost
+
+  // 🔥 Relation
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([latitude, longitude])
+  @@index([seoScore])
+  @@index([boostEndsAt])  // cron uses this to find expired boosts fast
+  @@index([seoLastUpdatedAt]) // cron uses this to find stale scores
 }

@@ -1,11 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import PlacesInput from "../_component/Input";
-import { useAuth } from "../context/AuthContext";
+import { useParams, useRouter } from "next/navigation";
+import PlacesInput from "@/app/_component/Input";
+import { useAuth } from "@/app/context/AuthContext";
+
 // ─── Types ─────────────────────────────────────────────────────────────────────
+type MainOption = "search" | "sell" | "buy" | "pg";
+
 type FormState = {
   name: string; sector: string; area: string; street: string; phone: string;
   location: string;
+  latitude: string; longitude: string;
   singleAC: boolean; singleCooler: boolean; singleTable: boolean;
   doubleAC: boolean; doubleCooler: boolean; doubleTable: boolean;
   tripleAC: boolean; tripleCooler: boolean; tripleTable: boolean; tripleFan: boolean;
@@ -22,7 +27,6 @@ type BooleanKeys = { [K in keyof FormState]: FormState[K] extends boolean ? K : 
 type StringKeys  = { [K in keyof FormState]: FormState[K] extends string  ? K : never }[keyof FormState];
 type FileKeys    = { [K in keyof FormState]: FormState[K] extends File | null ? K : never }[keyof FormState];
 
-type MainOption = "search" | "sell" | "buy" | "pg";
 type PlanId = "free" | "premium" | "pro";
 
 interface Plan {
@@ -54,60 +58,47 @@ const SearchIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
   </svg>
 );
-const HomeIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
-  </svg>
-);
+
 const BuildingIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16M3 21h18M9 9h1m4 0h1M9 13h1m4 0h1M9 17h1m4 0h1" />
   </svg>
 );
-const MapPinIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
-  </svg>
-);
+
 const ChevronRightIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 18l6-6-6-6" />
   </svg>
 );
+
 const CheckIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
   </svg>
 );
+
 const UploadIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M12 4v12M8 8l4-4 4 4" />
   </svg>
 );
+
 const StarIcon = () => (
   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 );
 
-// ─── Data ──────────────────────────────────────────────────────────────────────
-const MAIN_OPTIONS: { id: MainOption; label: string; icon: React.ReactElement; desc: string }[] = [
-  { id: "search", label: "Search Property", icon: <SearchIcon />, desc: "Find your dream property" },
-  { id: "sell",   label: "Sell Property",   icon: <HomeIcon />,     desc: "List your property for sale" },
-  { id: "buy",    label: "Buy Property",    icon: <BuildingIcon />, desc: "Browse properties to buy" },
-  { id: "pg",     label: "PG / Hostel",     icon: <MapPinIcon />,   desc: "Find or list PG & hostels" },
-];
-
 const PROPERTY_TYPES = ["1 BHK", "2 BHK", "1 RK", "House", "Land", "Villa", "Shop/Commercial", "Flat"];
 const FORM_STEPS = ["Basic Info", "Room Details", "Washroom", "Food", "Services", "Photos", "Pricing"];
-const LAST_FORM_STEP = FORM_STEPS.length - 1; // index 6
+const LAST_FORM_STEP = FORM_STEPS.length - 1;
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 interface CheckboxProps { label: string; checked: boolean; onChange: () => void; }
 function Checkbox({ label, checked, onChange }: CheckboxProps) {
   return (
     <label className="flex items-center gap-2 cursor-pointer group select-none">
-      <span onClick={onChange} className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${checked ? "bg-green-400 border-green-400" : "border-gray-300 group-hover:border-green-400"}`}>
+      <span onClick={onChange} className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${checked ? "bg-[#639922] border-[#639922]" : "border-gray-300 group-hover:border-[#639922]"}`}>
         {checked && <CheckIcon />}
       </span>
       <span className="text-sm text-gray-700">{label}</span>
@@ -122,12 +113,12 @@ function StepIndicator({ steps, current }: StepIndicatorProps) {
       {steps.map((stepLabel, i) => (
         <div key={i} className="flex items-center">
           <div className="flex flex-col items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 ${i < current ? "bg-green-400 border-green-400 text-white" : i === current ? "bg-white border-green-400 text-green-600" : "bg-white border-gray-200 text-gray-400"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 ${i < current ? "bg-[#639922] border-[#639922] text-white" : i === current ? "bg-white border-[#639922] text-[#639922]" : "bg-white border-gray-200 text-gray-400"}`}>
               {i < current ? <CheckIcon /> : i + 1}
             </div>
-            <span className={`text-[10px] mt-1 whitespace-nowrap font-medium ${i === current ? "text-green-600" : "text-gray-400"}`}>{stepLabel}</span>
+            <span className={`text-[10px] mt-1 whitespace-nowrap font-medium ${i === current ? "text-[#639922]" : "text-gray-400"}`}>{stepLabel}</span>
           </div>
-          {i < steps.length - 1 && <div className={`h-0.5 w-6 sm:w-10 mx-1 mb-4 transition-all duration-300 ${i < current ? "bg-green-400" : "bg-gray-200"}`} />}
+          {i < steps.length - 1 && <div className={`h-0.5 w-6 sm:w-10 mx-1 mb-4 transition-all duration-300 ${i < current ? "bg-[#639922]" : "bg-gray-200"}`} />}
         </div>
       ))}
     </div>
@@ -138,8 +129,8 @@ interface SectionProps { title: string; children: React.ReactNode; }
 function Section({ title, children }: SectionProps) {
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-semibold text-green-700 uppercase tracking-widest mb-3 flex items-center gap-2">
-        <span className="h-px flex-1 bg-green-100" />{title}<span className="h-px flex-1 bg-green-100" />
+      <h3 className="text-sm font-semibold text-[#639922] uppercase tracking-widest mb-3 flex items-center gap-2">
+        <span className="h-px flex-1 bg-[#e8f0da]" />{title}<span className="h-px flex-1 bg-[#e8f0da]" />
       </h3>
       <div className="space-y-3">{children}</div>
     </div>
@@ -153,9 +144,9 @@ interface FieldProps {
 function Field({ label, type = "text", placeholder, value, onChange, required = false }: FieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-green-500">*</span>}</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-[#639922]">*</span>}</label>
       <input type={type} placeholder={placeholder} value={value} onChange={onChange}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition bg-white placeholder:text-gray-400" />
+        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#639922] focus:border-[#639922] transition bg-white placeholder:text-gray-400" />
     </div>
   );
 }
@@ -165,9 +156,9 @@ function PhotoUpload({ label, value, onChange }: PhotoUploadProps) {
   return (
     <div>
       <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-      <label className="flex flex-col items-center justify-center border-2 border-dashed border-green-200 rounded-xl py-4 px-3 cursor-pointer hover:border-green-400 hover:bg-green-50 transition-all duration-200 group">
+      <label className="flex flex-col items-center justify-center border-2 border-dashed border-[#e8f0da] rounded-xl py-4 px-3 cursor-pointer hover:border-[#639922] hover:bg-[#f0f7e6] transition-all duration-200 group">
         <UploadIcon />
-        <span className="text-xs text-gray-400 mt-1 group-hover:text-green-500 transition-colors">{value ? value.name : "Click to upload"}</span>
+        <span className="text-xs text-gray-400 mt-1 group-hover:text-[#639922] transition-colors">{value ? value.name : "Click to upload"}</span>
         <input type="file" accept="image/*" className="hidden" onChange={onChange} />
       </label>
     </div>
@@ -183,12 +174,12 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
       onClick={onSelect}
       className={`relative w-full text-left rounded-2xl border-2 p-5 transition-all duration-300 ${
         selected
-          ? "border-green-400 bg-green-50 shadow-lg shadow-green-100"
-          : "border-gray-200 bg-white hover:border-green-300 hover:shadow-md"
+          ? "border-[#639922] bg-[#f0f7e6] shadow-lg shadow-[#639922]/20"
+          : "border-gray-200 bg-white hover:border-[#639922] hover:shadow-md"
       }`}
     >
       {plan.badge && (
-        <span className={`absolute -top-3 left-4 text-[10px] font-bold px-3 py-1 rounded-full ${isPopular ? "bg-green-400 text-white" : "bg-amber-400 text-white"}`}>
+        <span className={`absolute -top-3 left-4 text-[10px] font-bold px-3 py-1 rounded-full ${isPopular ? "bg-[#639922] text-white" : "bg-amber-400 text-white"}`}>
           {plan.badge}
         </span>
       )}
@@ -198,14 +189,14 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
           <p className="text-xs text-gray-400 mt-0.5">{plan.duration}</p>
         </div>
         <div className="text-right">
-          <p className={`text-xl font-black ${selected ? "text-green-600" : "text-gray-800"}`}>{plan.price}</p>
+          <p className={`text-xl font-black ${selected ? "text-[#639922]" : "text-gray-800"}`}>{plan.price}</p>
           <p className="text-[10px] text-gray-400">{plan.priceNote}</p>
         </div>
       </div>
       <ul className="space-y-1.5 mb-4">
         {plan.features.map((f) => (
           <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
-            <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${selected ? "bg-green-400" : "bg-gray-100"}`}>
+            <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${selected ? "bg-[#639922]" : "bg-gray-100"}`}>
               <svg className={`w-2.5 h-2.5 ${selected ? "text-white" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
@@ -214,7 +205,7 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
           </li>
         ))}
       </ul>
-      <div className={`w-full py-2 rounded-xl text-xs font-bold text-center transition-all ${selected ? "bg-green-400 text-white" : "bg-gray-100 text-gray-500"}`}>
+      <div className={`w-full py-2 rounded-xl text-xs font-bold text-center transition-all ${selected ? "bg-[#639922] text-white" : "bg-gray-100 text-gray-500"}`}>
         {selected ? "✓ Selected" : "Select Plan"}
       </div>
     </button>
@@ -223,26 +214,29 @@ function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function Rent() {
-  const [mainOption, setMainOption]     = useState<MainOption | null>(null);
+  const params = useParams();
+  const router = useRouter();
+
+  // Derive mainOption from the URL param — no useState needed
+  const mainOption = (params?.type as MainOption) ?? "sell";
+
   const [propertyType, setPropertyType] = useState<string | null>(null);
   const [step, setStep]                 = useState(0);
-
-  // "showPlanScreen" = user finished form but has no sub yet → show plan picker
   const [showPlanScreen, setShowPlanScreen] = useState(false);
-
   const [submitting, setSubmitting]     = useState(false);
   const [submitted, setSubmitted]       = useState(false);
   const [error, setError]               = useState("");
 
   // Subscription
-  const [subLoading, setSubLoading]         = useState(true);
+  const [subLoading, setSubLoading]           = useState(true);
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
-  const [selectedPlan, setSelectedPlan]     = useState<PlanId | null>(null);
-  const [planSubmitting, setPlanSubmitting] = useState(false);
-  const [planError, setPlanError]           = useState("");
+  const [selectedPlan, setSelectedPlan]       = useState<PlanId | null>(null);
+  const [planSubmitting, setPlanSubmitting]   = useState(false);
+  const [planError, setPlanError]             = useState("");
 
   const [form, setForm] = useState<FormState>({
     name: "", sector: "", area: "", street: "", phone: "", location: "",
+    latitude: "", longitude: "",
     singleAC: false, singleCooler: false, singleTable: false,
     doubleAC: false, doubleCooler: false, doubleTable: false,
     tripleAC: false, tripleCooler: false, tripleTable: false, tripleFan: false,
@@ -254,10 +248,16 @@ export default function Rent() {
     photoDining: null, photoTerrace: null,
     rent: "", electricity: "",
   });
+
   const { user } = useAuth();
-  if(!user) {
-    window.location.href = "/Login";
-  }
+
+  // ── Auth redirect (safe — inside useEffect) ──────────────────────────────────
+  useEffect(() => {
+    if (!user) {
+      router.push("/Login");
+    }
+  }, [user, router]);
+
   // ── Fetch subscription status on mount ──────────────────────────────────────
   useEffect(() => {
     const fetchSub = async () => {
@@ -278,18 +278,14 @@ export default function Rent() {
   const toggleF = (key: BooleanKeys) => () => setForm((f) => ({ ...f, [key]: !f[key] }));
   const setFile = (key: FileKeys)    => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [key]: e.target.files?.[0] ?? null }));
 
-  // Called from last form step's "Submit" button
   const handleFormComplete = () => {
     if (!hasSubscription) {
-      // Show plan selection screen (form data is already saved in state)
       setShowPlanScreen(true);
     } else {
-      // Already subscribed → go straight to API
       submitProperty();
     }
   };
 
-  // Called after plan is activated (or if already subscribed)
   const submitProperty = async () => {
     setSubmitting(true);
     setError("");
@@ -309,7 +305,6 @@ export default function Rent() {
     }
   };
 
-  // Activate plan then submit property
   const handlePlanAndSubmit = async () => {
     if (!selectedPlan) { setPlanError("Please select a plan to continue."); return; }
     setPlanSubmitting(true);
@@ -322,7 +317,6 @@ export default function Rent() {
       });
       if (!res.ok) throw new Error("Failed to set subscription");
       setHasSubscription(true);
-      // Now submit the property
       await submitProperty();
     } catch {
       setPlanError("Could not activate plan. Please try again.");
@@ -358,9 +352,9 @@ export default function Rent() {
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (subLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <svg className="w-8 h-8 animate-spin text-green-400" fill="none" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 animate-spin text-[#639922]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
@@ -373,18 +367,24 @@ export default function Rent() {
   // ── Success Screen ───────────────────────────────────────────────────────────
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] flex items-center justify-center p-6">
         <div className="text-center space-y-4 max-w-sm">
-          <div className="w-20 h-20 bg-green-400 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-200">
+          <div className="w-20 h-20 bg-[#639922] rounded-full flex items-center justify-center mx-auto shadow-lg shadow-[#639922]/30">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-green-900">Property Listed!</h2>
+          <h2 className="text-2xl font-bold text-[#639922]">Property Listed!</h2>
           <p className="text-gray-500 text-sm">Submitted successfully. Our team will review and publish it shortly.</p>
           <button
-            onClick={() => { setSubmitted(false); setMainOption(null); setPropertyType(null); setStep(0); setShowPlanScreen(false); }}
-            className="mt-4 px-6 py-2.5 bg-green-400 text-white rounded-xl font-semibold hover:bg-green-500 transition"
+            onClick={() => {
+              setSubmitted(false);
+              setPropertyType(null);
+              setStep(0);
+              setShowPlanScreen(false);
+              router.push("/Rent");
+            }}
+            className="mt-4 px-6 py-2.5 bg-[#639922] text-white rounded-xl font-semibold hover:bg-[#507a1b] transition"
           >
             List Another Property
           </button>
@@ -393,22 +393,20 @@ export default function Rent() {
     );
   }
 
-  // ── Plan Selection Screen (shown AFTER form is complete) ─────────────────────
+  // ── Plan Selection Screen ────────────────────────────────────────────────────
   if (showPlanScreen) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 text-black">
+      <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] text-black">
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-          {/* Back to form */}
           <button
             onClick={() => setShowPlanScreen(false)}
-            className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline"
+            className="text-sm text-[#639922] flex items-center gap-1 mb-8 hover:underline"
           >
             ← Back to Form
           </button>
 
-          {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 text-green-700 text-xs font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-[#f0f7e6] border border-[#e8f0da] rounded-full px-4 py-1.5 text-[#639922] text-xs font-semibold mb-4">
               <StarIcon /> One Last Step
             </div>
             <h2 className="text-3xl font-black text-gray-900 mb-2">Choose Your Plan</h2>
@@ -417,7 +415,6 @@ export default function Rent() {
             </p>
           </div>
 
-          {/* Plan Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8 mt-6">
             {PLANS.map((plan) => (
               <PlanCard
@@ -439,7 +436,7 @@ export default function Rent() {
           <button
             onClick={handlePlanAndSubmit}
             disabled={planSubmitting || submitting || !selectedPlan}
-            className="w-full bg-green-400 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
+            className="w-full bg-[#639922] hover:bg-[#507a1b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#639922]/20"
           >
             {(planSubmitting || submitting) ? (
               <>
@@ -458,59 +455,14 @@ export default function Rent() {
     );
   }
 
-  // ── Landing ──────────────────────────────────────────────────────────────────
-  if (!mainOption) {
-    return (
-      <div className="bg-gradient-to-br from-white via-green-50/40 to-white min-h-screen">
-        <main className="max-w-5xl mx-auto px-6 py-16">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-4 py-1.5 text-green-700 text-xs font-semibold mb-5 tracking-wide">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              Live Platform
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight mb-4">
-              Your Property,<br /><span className="text-green-400">Your Way.</span>
-            </h1>
-            <p className="text-gray-500 max-w-md mx-auto text-base leading-relaxed">
-              Search, buy, sell or list your PG — everything in one professional platform.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-16">
-            {MAIN_OPTIONS.map((opt) => (
-              <button key={opt.id} onClick={() => setMainOption(opt.id)}
-                className="group relative bg-white border-2 border-gray-100 hover:border-green-400 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-green-100 hover:-translate-y-1">
-                <div className="w-12 h-12 bg-green-50 group-hover:bg-green-400 rounded-xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 text-green-500 group-hover:text-white">
-                  {opt.icon}
-                </div>
-                <p className="font-bold text-gray-900 text-sm mb-1">{opt.label}</p>
-                <p className="text-xs text-gray-400">{opt.desc}</p>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-green-400"><ChevronRightIcon /></div>
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-white border border-green-100 rounded-2xl p-6 grid grid-cols-3 gap-4 text-center shadow-sm">
-            {([ ["12,400+", "Properties Listed"], ["98%", "Satisfaction Rate"], ["4.8★", "Partner Rating"] ] as [string, string][]).map(([num, lbl]) => (
-              <div key={lbl}>
-                <p className="text-2xl font-black text-green-400">{num}</p>
-                <p className="text-xs text-gray-400 mt-1">{lbl}</p>
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   // ── Property Type Selection ──────────────────────────────────────────────────
   if ((mainOption === "sell" || mainOption === "buy" || mainOption === "pg") && !propertyType) {
     const isPG = mainOption === "pg";
     const types = isPG ? ["Single Room", "Double Sharing", "Triple Sharing", "Full Hostel"] : PROPERTY_TYPES;
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] p-6">
         <div className="max-w-2xl mx-auto">
-          <button onClick={() => setMainOption(null)} className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline">← Back</button>
+          <button onClick={() => router.push("/Rent")} className="text-sm text-[#639922] flex items-center gap-1 mb-8 hover:underline">← Back</button>
           <h2 className="text-3xl font-black text-gray-900 mb-2">
             {isPG ? "Select PG / Hostel Type" : `Select Property Type to ${mainOption === "sell" ? "Sell" : "Buy"}`}
           </h2>
@@ -518,8 +470,8 @@ export default function Rent() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {types.map((t) => (
               <button key={t} onClick={() => setPropertyType(t)}
-                className="group border-2 border-gray-100 hover:border-green-400 bg-white rounded-2xl p-5 text-left transition-all duration-200 hover:shadow-lg hover:shadow-green-100 hover:-translate-y-0.5">
-                <div className="w-9 h-9 bg-green-50 group-hover:bg-green-400 rounded-xl flex items-center justify-center mb-3 transition-all duration-200 text-green-500 group-hover:text-white">
+                className="group border-2 border-gray-100 hover:border-[#639922] bg-white rounded-2xl p-5 text-left transition-all duration-200 hover:shadow-lg hover:shadow-[#639922]/20 hover:-translate-y-0.5">
+                <div className="w-9 h-9 bg-[#f0f7e6] group-hover:bg-[#639922] rounded-xl flex items-center justify-center mb-3 transition-all duration-200 text-[#639922] group-hover:text-white">
                   <BuildingIcon />
                 </div>
                 <p className="font-bold text-gray-800 text-sm">{t}</p>
@@ -534,21 +486,21 @@ export default function Rent() {
   // ── Search Mode ──────────────────────────────────────────────────────────────
   if (mainOption === "search") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-green-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] p-6">
         <div className="max-w-2xl mx-auto">
-          <button onClick={() => setMainOption(null)} className="text-sm text-green-600 flex items-center gap-1 mb-8 hover:underline">← Back</button>
+          <button onClick={() => router.push("/")} className="text-sm text-[#639922] flex items-center gap-1 mb-8 hover:underline">← Back</button>
           <h2 className="text-3xl font-black text-gray-900 mb-6">Search Properties</h2>
-          <div className="bg-white border border-green-100 rounded-2xl p-6 shadow-sm space-y-4">
-            <div className="flex items-center border-2 border-green-200 rounded-xl overflow-hidden focus-within:border-green-400 transition">
-              <span className="px-3 text-green-400"><SearchIcon /></span>
+          <div className="bg-white border border-[#e8f0da] rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="flex items-center border-2 border-[#e8f0da] rounded-xl overflow-hidden focus-within:border-[#639922] transition">
+              <span className="px-3 text-[#639922]"><SearchIcon /></span>
               <input className="flex-1 py-3 pr-4 text-sm outline-none placeholder:text-gray-400" placeholder="Search by location, property name..." />
             </div>
             <div className="grid grid-cols-2 gap-3">
               {PROPERTY_TYPES.map((t) => (
-                <button key={t} className="border border-gray-200 hover:border-green-400 hover:bg-green-50 rounded-xl py-2.5 px-4 text-sm font-medium text-gray-700 transition-all duration-200">{t}</button>
+                <button key={t} className="border border-gray-200 hover:border-[#639922] hover:bg-[#f0f7e6] rounded-xl py-2.5 px-4 text-sm font-medium text-gray-700 transition-all duration-200">{t}</button>
               ))}
             </div>
-            <button className="w-full bg-green-400 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+            <button className="w-full bg-[#639922] hover:bg-[#507a1b] text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
               <SearchIcon /> Search Now
             </button>
           </div>
@@ -558,8 +510,6 @@ export default function Rent() {
   }
 
   // ── Multi-Step Form ──────────────────────────────────────────────────────────
-  const totalSteps = FORM_STEPS.length;
-
   const renderStep = () => {
     switch (step) {
       case 0:
@@ -576,7 +526,7 @@ export default function Rent() {
               </div>
             </Section>
             <Section title="Map Location">
-              <div className="border border-gray-200 rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-green-300">
+              <div className="border border-gray-200 rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-[#639922]">
                 <PlacesInput
                   value={form.location}
                   onChange={(val: string) => setForm((f) => ({ ...f, location: val }))}
@@ -630,7 +580,7 @@ export default function Rent() {
               {(["Single", "Double", "Triple"] as const).map((t) => (
                 <label key={t} className="flex items-center gap-3 cursor-pointer group">
                   <span onClick={() => setForm((f) => ({ ...f, sharingWashroom: t }))}
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${form.sharingWashroom === t ? "border-green-400 bg-green-400" : "border-gray-300"}`}>
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${form.sharingWashroom === t ? "border-[#639922] bg-[#639922]" : "border-gray-300"}`}>
                     {form.sharingWashroom === t && <span className="w-2 h-2 rounded-full bg-white" />}
                   </span>
                   <span className="text-sm text-gray-700">{t} Sharing</span>
@@ -647,14 +597,14 @@ export default function Rent() {
               <div className="grid grid-cols-3 gap-3">
                 {mealItems.map(({ key, lbl }) => (
                   <button key={key} onClick={toggleF(key)}
-                    className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${form[key] ? "border-green-400 bg-green-50 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-200"}`}>
+                    className={`py-3 rounded-xl border-2 text-sm font-semibold transition-all duration-200 ${form[key] ? "border-[#639922] bg-[#f0f7e6] text-[#639922]" : "border-gray-200 text-gray-500 hover:border-[#e8f0da]"}`}>
                     {lbl}
                   </button>
                 ))}
               </div>
             </Section>
             <Section title="Menu Upload">
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-green-200 rounded-xl py-6 cursor-pointer hover:border-green-400 hover:bg-green-50 transition-all">
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-[#e8f0da] rounded-xl py-6 cursor-pointer hover:border-[#639922] hover:bg-[#f0f7e6] transition-all">
                 <UploadIcon />
                 <p className="text-sm text-gray-400 mt-2">{form.menu ? form.menu.name : "Upload Menu PDF"}</p>
                 <p className="text-xs text-gray-300 mt-1">PDF format only</p>
@@ -671,9 +621,9 @@ export default function Rent() {
               <div className="grid grid-cols-2 gap-4">
                 {serviceItems.map(({ key, lbl }) => (
                   <button key={key} onClick={toggleF(key)}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${form[key] ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-green-200"}`}>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${form[key] ? "bg-green-400" : "bg-gray-100"}`}><CheckIcon /></div>
-                    <span className={`text-sm font-semibold ${form[key] ? "text-green-700" : "text-gray-600"}`}>{lbl}</span>
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 text-left ${form[key] ? "border-[#639922] bg-[#f0f7e6]" : "border-gray-200 hover:border-[#e8f0da]"}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${form[key] ? "bg-[#639922]" : "bg-gray-100"}`}><CheckIcon /></div>
+                    <span className={`text-sm font-semibold ${form[key] ? "text-[#639922]" : "text-gray-600"}`}>{lbl}</span>
                   </button>
                 ))}
               </div>
@@ -700,11 +650,11 @@ export default function Rent() {
             <Section title="Pricing Details">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent <span className="text-green-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent <span className="text-[#639922]">*</span></label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
                     <input type="number" placeholder="8000" value={form.rent} onChange={setF("rent")}
-                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition" />
+                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#639922] focus:border-[#639922] transition" />
                   </div>
                 </div>
                 <div>
@@ -712,19 +662,18 @@ export default function Rent() {
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">₹</span>
                     <input type="number" placeholder="8" value={form.electricity} onChange={setF("electricity")}
-                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 transition" />
+                      className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#639922] focus:border-[#639922] transition" />
                   </div>
                 </div>
               </div>
             </Section>
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-5 space-y-2">
-              <p className="text-xs font-semibold text-green-700 uppercase tracking-widest mb-3">Listing Summary</p>
+            <div className="bg-[#f0f7e6] border border-[#e8f0da] rounded-2xl p-5 space-y-2">
+              <p className="text-xs font-semibold text-[#639922] uppercase tracking-widest mb-3">Listing Summary</p>
               <div className="flex justify-between text-sm"><span className="text-gray-500">Type</span><span className="font-semibold text-gray-800">{propertyType ?? "—"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-500">Name</span><span className="font-semibold text-gray-800">{form.name || "—"}</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-500">Location</span><span className="font-semibold text-gray-800">{form.location || [form.sector, form.area].filter(Boolean).join(", ") || "—"}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-gray-500">Monthly Rent</span><span className="font-semibold text-green-600">₹{form.rent || "—"}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-500">Monthly Rent</span><span className="font-semibold text-[#639922]">₹{form.rent || "—"}</span></div>
             </div>
-            {/* Hint only shown if no subscription */}
             {!hasSubscription && (
               <p className="text-xs text-center text-gray-400">
                 You'll choose a subscription plan on the next screen before publishing.
@@ -740,38 +689,40 @@ export default function Rent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-green-50 text-black">
+    <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] text-black">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <button
-          onClick={() => { if (step > 0) setStep((s) => s - 1); else setPropertyType(null); }}
-          className="text-sm text-green-600 flex items-center gap-1 mb-6 hover:underline"
+          onClick={() => {
+            if (step > 0) setStep((s) => s - 1);
+            else setPropertyType(null);
+          }}
+          className="text-sm text-[#639922] flex items-center gap-1 mb-6 hover:underline"
         >
           ← {step > 0 ? "Previous Step" : "Back"}
         </button>
 
         <div className="mb-6">
           <h2 className="text-2xl font-black text-gray-900">{step === 0 ? "Basic Information" : FORM_STEPS[step]}</h2>
-          <p className="text-sm text-gray-400 mt-1">Step {step + 1} of {totalSteps}</p>
+          <p className="text-sm text-gray-400 mt-1">Step {step + 1} of {FORM_STEPS.length}</p>
         </div>
 
         <StepIndicator steps={FORM_STEPS} current={step} />
 
-        <div className="bg-white border border-green-100 rounded-2xl p-6 shadow-sm">{renderStep()}</div>
+        <div className="bg-white border border-[#e8f0da] rounded-2xl p-6 shadow-sm">{renderStep()}</div>
 
         <div className="flex gap-3 mt-6">
           {step < LAST_FORM_STEP ? (
             <button
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 bg-green-400 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
+              className="flex-1 bg-[#639922] hover:bg-[#507a1b] text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#639922]/20"
             >
               Continue <ChevronRightIcon />
             </button>
           ) : (
-            // Last step button — behaviour differs based on subscription status
             <button
               onClick={handleFormComplete}
               disabled={submitting}
-              className="flex-1 bg-green-400 hover:bg-green-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-green-100"
+              className="flex-1 bg-[#639922] hover:bg-[#507a1b] disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#639922]/20"
             >
               {submitting ? (
                 <>

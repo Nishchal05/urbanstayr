@@ -81,6 +81,8 @@ export default function PlacesInput({
       const formatted: Suggestion[] =
         data.suggestions?.map((s: any) => ({
           placeId: s.placePrediction?.placeId,
+          latitude: s.placePrediction?.location?.latitude,
+          longitude: s.placePrediction?.location?.longitude,
           description: s.placePrediction?.text?.text,
         })) || [];
 
