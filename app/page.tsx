@@ -5,8 +5,9 @@ import RentYourProperty from "./_component/rentyourproperty";
 export default function Home() {
   return (
     <div>
+    <RentYourProperty/>
      <LandingHerosection/>
-     <RentYourProperty/>
+     
     </div>
   );
 }
