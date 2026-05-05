@@ -249,29 +249,33 @@ export default function PlacesInput({
                     Quick select
                   </p>
 
-                  <div className="flex flex-wrap gap-2">
-                    {/* Current location chip */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {/* Current location box */}
                     <button
                       onClick={() => { setIsOpen(false); onUseCurrentLocation?.(); }}
-                      className="flex flex-col justify-center items-center gap-1.5 px-4 py-2 rounded-md
-                        bg-[#3B6D11] border-none text-white text-[20px] font-medium
-                        cursor-pointer hover:bg-[#27500A] transition-colors w-[200px] h-[200px]"
+                      className="flex flex-col justify-center items-center gap-2 p-3 rounded-[16px]
+                        bg-[#639922] border-none text-white text-[13px] sm:text-sm font-semibold
+                        cursor-pointer hover:bg-[#3B6D11] hover:shadow-md hover:-translate-y-0.5 transition-all w-full aspect-[4/3]"
                     >
-                      <Locate size={13} />
-                      Current location
+                      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-1">
+                        <Locate size={18} />
+                      </div>
+                      <span className="text-center leading-tight tracking-wide">Current<br/>Location</span>
                     </button>
 
-                    {/* City chips */}
+                    {/* City boxes */}
                     {POPULAR_CITIES.map((city) => (
                       <button
                         key={city.name}
                         onClick={() => handleSelectCity(city)}
-                        className="flex flex-col items-center justify-center gap-1.5 px-3.5 py-2 rounded-md
-                          border-[1.5px] border-[#C0DD97] bg-white text-[#27500A]
-                          text-[20px] font-medium cursor-pointer
-                          hover:border-[#639922] hover:bg-[#F7FDF0] transition-all w-[200px] h-[200px]"
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-[16px]
+                          border border-[#C0DD97] bg-white text-[#173404]
+                          text-[13px] sm:text-sm font-semibold cursor-pointer
+                          hover:border-[#639922] hover:bg-[#F7FDF0] hover:shadow-md hover:-translate-y-0.5 transition-all w-full aspect-[4/3]"
                       >
-                        <MapPin size={12} className="text-[#639922]" />
+                        <div className="w-9 h-9 rounded-full bg-[#EAF3DE] flex items-center justify-center mb-1 group-hover:bg-[#C0DD97] transition-colors">
+                          <MapPin size={18} className="text-[#639922]" />
+                        </div>
                         {city.name}
                       </button>
                     ))}
