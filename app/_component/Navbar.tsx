@@ -33,29 +33,30 @@ const [location,setLocation]=useState('');
       {/* Main Navbar */}
       <nav className="w-[90%] max-w-[900px] mx-auto my-5 bg-white/70 backdrop-blur-lg border border-green-700/20 rounded-full flex justify-between items-center pl-6 pr-2 py-2 shadow-sm relative z-50">
 
-        {/* Brand */}
-        <div className=" flex gap-2">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-9 h-9 bg-green-800 rounded-full flex items-center justify-center">
-            <Home size={16} color="white" />
+        {/* Brand & Search */}
+        <div className="flex flex-1 items-center gap-2 sm:gap-4 min-w-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-9 h-9 bg-green-800 rounded-full flex items-center justify-center">
+              <Home size={16} color="white" />
+            </div>
+            <span className="font-serif text-xl font-semibold text-green-900 tracking-tight hidden sm:block">
+              urban <span className="text-green-600">s</span>tayr
+            </span>
+          </Link>
+
+          <div className="flex flex-1 max-w-[260px] items-center bg-white/50 border border-green-700/30 hover:border-green-800 rounded-full px-3 py-1.5 transition-colors min-w-0">
+            <svg className="text-green-800 shrink-0 hidden sm:block mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" 
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9L12 15L18 9"/>
+            </svg>
+            <div className="flex-1 min-w-0">
+              <PlacesInput 
+                value={location}
+                onChange={setLocation}
+                placeholder="Search..." 
+              />
+            </div>
           </div>
-          <span className="font-serif text-xl font-semibold text-green-900 tracking-tight">
-            urban <span className="text-green-600">s</span>tayr
-          </span>
-        </Link>
-<div className="hidden sm:flex flex-1 max-w-[260px] mx-4 items-center bg-white/50 border border-b-green-800 rounded-full px-4 py-1.5 transition-colors">
-          <svg className="text-green-800" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-  <path d="M6 9L12 15L18 9"/>
-</svg>
-          <div className="flex-1 min-w-0">
-            <PlacesInput 
-              value={location}
-              onChange={setLocation}
-              placeholder="Search cities, areas..." 
-            />
-          </div>
-        </div>
         </div>
         
         {/* Search Bar */}
@@ -105,13 +106,7 @@ const [location,setLocation]=useState('');
         </div>
 
         {/* Mobile */}
-        <div className="flex md:hidden items-center gap-1 pr-1">
-          <button className="p-2 rounded-full hover:bg-green-100">
-            <Bell size={18} />
-          </button>
-          <button className="p-2 rounded-full hover:bg-green-100">
-            <Mail size={18} />
-          </button>
+        <div className="flex md:hidden items-center gap-1 pr-1 shrink-0">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-2 rounded-full hover:bg-green-100"
