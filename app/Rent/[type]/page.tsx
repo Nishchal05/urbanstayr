@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import PlacesInput from "@/app/_component/Input";
 import { useAuth } from "@/app/context/AuthContext";
+import { useS3Upload } from "@/lib/hooks/useS3Upload";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type MainOption = "search" | "sell" | "buy" | "pg";
@@ -17,7 +18,7 @@ type FormState = {
   attachedWashroom: boolean; sharingWashroom: string;
   breakfast: boolean; lunch: boolean; dinner: boolean; menu: File | null;
   housekeeping: boolean; washingMachine: boolean; parking: boolean; kitchen: boolean;
-  photoRooms: File | null; photoWashroom: File | null; photoKitchen: File | null;
+  photoRooms: File | null; photoRooms1: File | null; photoWashroom: File | null; photoKitchen: File | null;
   photoProperty: File | null; photoWashing: File | null; photoParking: File | null;
   photoDining: File | null; photoTerrace: File | null;
   rent: string; electricity: string;
@@ -243,13 +244,14 @@ export default function Rent() {
     attachedWashroom: false, sharingWashroom: "",
     breakfast: false, lunch: false, dinner: false, menu: null,
     housekeeping: false, washingMachine: false, parking: false, kitchen: false,
-    photoRooms: null, photoWashroom: null, photoKitchen: null,
+    photoRooms: null, photoRooms1: null, photoWashroom: null, photoKitchen: null,
     photoProperty: null, photoWashing: null, photoParking: null,
     photoDining: null, photoTerrace: null,
     rent: "", electricity: "",
   });
 
   const { user } = useAuth();
+  const { upload } = useS3Upload();
 
   // ── Auth redirect (safe — inside useEffect) ──────────────────────────────────
   useEffect(() => {
@@ -290,15 +292,57 @@ export default function Rent() {
     setSubmitting(true);
     setError("");
     try {
+      // Upload menu
+      let menuUrl = null;
+      if (form.menu) {
+        const res = await upload(form.menu);
+        menuUrl = res.publicUrl;
+      }
+
+      // Upload photos
+      const photoKeys: FileKeys[] = [
+        "photoRooms", "photoRooms1", "photoWashroom", "photoKitchen",
+        "photoProperty", "photoWashing", "photoParking", "photoDining", "photoTerrace"
+      ];
+      
+      const urls: Partial<Record<FileKeys, string>> = {};
+      
+      for (const key of photoKeys) {
+        const file = form[key];
+        if (file) {
+          const res = await upload(file);
+          urls[key] = res.publicUrl;
+        }
+      }
+
+      // Construct Prisma data
+      const { photoRooms1, menu, photoRooms, ...restForm } = form;
+
+      const payload = {
+        ...restForm,
+        propertyType,
+        listingType: mainOption,
+        menu: menuUrl ? { url: menuUrl } : null,
+        photoRooms: [urls.photoRooms, urls.photoRooms1].filter(Boolean),
+        photoWashroom: urls.photoWashroom || null,
+        photoKitchen: urls.photoKitchen || null,
+        photoProperty: urls.photoProperty || null,
+        photoWashing: urls.photoWashing || null,
+        photoParking: urls.photoParking || null,
+        photoDining: urls.photoDining || null,
+        photoTerrace: urls.photoTerrace || null,
+      };
+
       const res = await fetch("/api/partner/property", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, propertyType, listingType: mainOption }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Submission failed");
       setSubmitted(true);
       setShowPlanScreen(false);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
@@ -340,12 +384,12 @@ export default function Rent() {
 
   const photoItems: { key: FileKeys; lbl: string }[] = [
     { key: "photoRooms",    lbl: "Rooms" },
+    { key: "photoRooms1",    lbl: "Rooms1" },
     { key: "photoWashroom", lbl: "Washroom" },
     { key: "photoKitchen",  lbl: "Kitchen" },
     { key: "photoProperty", lbl: "Whole Property" },
     { key: "photoWashing",  lbl: "Washing Area" },
     { key: "photoParking",  lbl: "Parking Area" },
-    { key: "photoDining",   lbl: "Dining Area" },
     { key: "photoTerrace",  lbl: "Terrace Space" },
   ];
 

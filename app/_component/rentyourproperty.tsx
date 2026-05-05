@@ -44,7 +44,6 @@ export default function RentYourProperty() {
     desc: string;
     link: string;
   }[] = [
-    { id: "search", label: "Search Property", icon: <SearchIcon />, desc: "Find your dream property from thousands of listings", link: "/Rent/search" },
     { id: "sell",   label: "Sell Property",   icon: <HomeIcon />,    desc: "List your property and reach thousands of buyers",  link: "/Rent/sell"   },
     { id: "buy",    label: "Buy Property",    icon: <BuildingIcon />,desc: "Browse verified properties ready for purchase",      link: "/Rent/buy"    },
     { id: "pg",     label: "PG / Hostel",     icon: <MapPinIcon />,  desc: "Discover or list PG accommodations near you",       link: "/Rent/pg"     },
@@ -72,60 +71,35 @@ export default function RentYourProperty() {
       <div className="absolute bottom-10 -left-16 w-72 h-72 rounded-full pointer-events-none"
         style={{ background: "#f0f7e6", filter: "blur(60px)", opacity: 0.4 }} />
 
-      {/* Hero */}
-     
+      
 
       {/* Cards */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {MAIN_OPTIONS.map((opt) => (
             <Link
               key={opt.id}
               href={opt.link}
               onClick={() => setMainOption(opt.id)}
-              className="group flex flex-col gap-4 rounded-2xl p-6 no-underline transition-all duration-300 bg-white"
-              style={{
-                border: "1px solid #e8f0da",
-                borderRadius: 20,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#639922";
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 40px rgba(99,153,34,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#e8f0da";
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              }}
+              className="group flex flex-col items-center text-center gap-4 rounded-[24px] p-8 transition-all duration-300 bg-white border border-[#e8f0da] hover:border-[#639922] hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(99,153,34,0.12)]"
             >
               {/* Icon */}
-              <div
-                className="w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300"
-                style={{ background: "#f0f7e6", color: "#639922", borderRadius: 14 }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#639922";
-                  (e.currentTarget as HTMLElement).style.color = "#fff";
-                }}
-              >
-                {opt.icon}
+              <div className="w-16 h-16 flex items-center justify-center rounded-2xl transition-all duration-300 bg-[#f0f8e8] text-[#639922] group-hover:bg-[#639922] group-hover:text-white group-hover:shadow-lg group-hover:shadow-[#639922]/30 mb-2">
+                <div className="scale-125">{opt.icon}</div>
               </div>
 
               {/* Text */}
               <div className="flex flex-col gap-2 flex-1">
-                <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 700, color: "#0f1a06", letterSpacing: "-0.01em" }}>
+                <h3 className="text-[20px] font-bold text-[#0f1a06] tracking-tight" style={{ fontFamily: "'Syne', sans-serif" }}>
                   {opt.label}
-                </span>
-                <span style={{ fontSize: 14, color: "#888780", lineHeight: 1.5 }}>
+                </h3>
+                <p className="text-[14px] text-[#7a9460] leading-relaxed px-2">
                   {opt.desc}
-                </span>
+                </p>
               </div>
 
               {/* Arrow */}
-              <div
-                className="self-end w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 mt-4 group-hover:bg-[#639922] group-hover:text-white group-hover:border-[#639922]"
-                style={{ border: "1px solid #e8f0da", color: "#c0dd97" }}
-              >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 mt-4 border border-[#e8f0da] text-[#97c459] group-hover:bg-[#639922] group-hover:text-white group-hover:border-[#639922] group-hover:scale-110">
                 <ChevronIcon />
               </div>
             </Link>

@@ -22,7 +22,6 @@ export function useS3Upload() {
     if (!res.ok) throw new Error("Failed to get upload URL");
     const { presignedUrl, key, publicUrl } = await res.json();
 
-    // Step 2: Upload directly to S3 using the presigned URL
     await fetch(presignedUrl, {
       method: "PUT",
       body: file,

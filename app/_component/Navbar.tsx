@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext"; // ✅ import context
+import PlacesInput from "./Input";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,14 +27,15 @@ export default function Navbar() {
       console.error("Failed to log out", err);
     }
   };
-
+const [location,setLocation]=useState('');
   return (
     <>
       {/* Main Navbar */}
       <nav className="w-[90%] max-w-[900px] mx-auto my-5 bg-white/70 backdrop-blur-lg border border-green-700/20 rounded-full flex justify-between items-center pl-6 pr-2 py-2 shadow-sm relative z-50">
 
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5">
+        <div className=" flex gap-2">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <div className="w-9 h-9 bg-green-800 rounded-full flex items-center justify-center">
             <Home size={16} color="white" />
           </div>
@@ -41,7 +43,23 @@ export default function Navbar() {
             urban <span className="text-green-600">s</span>tayr
           </span>
         </Link>
-
+<div className="hidden sm:flex flex-1 max-w-[260px] mx-4 items-center bg-white/50 border border-b-green-800 rounded-full px-4 py-1.5 transition-colors">
+          <svg className="text-green-800" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <path d="M6 9L12 15L18 9"/>
+</svg>
+          <div className="flex-1 min-w-0">
+            <PlacesInput 
+              value={location}
+              onChange={setLocation}
+              placeholder="Search cities, areas..." 
+            />
+          </div>
+        </div>
+        </div>
+        
+        {/* Search Bar */}
+        
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-1">
           {[ 
@@ -59,13 +77,6 @@ export default function Navbar() {
               {icon}
             </button>
           ))}
-
-          <Link
-            href="/Rent"
-            className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full ml-1"
-          >
-            Rent your property
-          </Link>
 
           {user ? (
             <button
