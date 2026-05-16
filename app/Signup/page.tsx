@@ -294,7 +294,7 @@ export default function SignupPage() {
 
           <p className="text-center text-xs text-gray-500 mt-5">
             Already have an account?{" "}
-            <a href="/Login" className="text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
+            <a href="/login" className="text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
               Sign in
             </a>
           </p>

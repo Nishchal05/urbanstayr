@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext"; // ✅ import context
-import PlacesInput from "./Input";
+import PlacesInput from "@/app/components/PlacesInput";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,7 +22,7 @@ export default function Navbar() {
       setUser(false);
 
       // optional: redirect
-      router.push("/Login");
+      router.push("/login");
     } catch (err) {
       console.error("Failed to log out", err);
     }
@@ -89,14 +89,14 @@ const [location,setLocation]=useState('');
           ) : (
             <>
               <Link
-                href="/Login"
+                href="/login"
                 className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full ml-1"
               >
                 Login
               </Link>
 
               <Link
-                href="/Signup"
+                href="/signup"
                 className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full ml-0.5"
               >
                 Register
@@ -133,10 +133,10 @@ const [location,setLocation]=useState('');
               </button>
             ) : (
               <>
-                <Link href="/Login" onClick={() => setMenuOpen(false)}>
+                <Link href="/login" onClick={() => setMenuOpen(false)}>
                   Login
                 </Link>
-                <Link href="/Signup" onClick={() => setMenuOpen(false)}>
+                <Link href="/signup" onClick={() => setMenuOpen(false)}>
                   Register
                 </Link>
               </>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import PlacesInput from "./Input";
+import PlacesInput from "@/app/components/PlacesInput";
 
 /* ─── types ─────────────────────────────────────────────────── */
 interface Filters {

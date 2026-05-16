@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
     const property = await prisma.property.create({
       data: {
         ...body,
+        latitude: body.latitude ? parseFloat(body.latitude) : null,
+        longitude: body.longitude ? parseFloat(body.longitude) : null,
         rent: Number(body.rent),
         electricity: Number(body.electricity),
         user: {

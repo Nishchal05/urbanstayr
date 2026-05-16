@@ -44,9 +44,9 @@ export default function RentYourProperty() {
     desc: string;
     link: string;
   }[] = [
-    { id: "sell",   label: "Sell Property",   icon: <HomeIcon />,    desc: "List your property and reach thousands of buyers",  link: "/Rent/sell"   },
-    { id: "buy",    label: "Buy Property",    icon: <BuildingIcon />,desc: "Browse verified properties ready for purchase",      link: "/Rent/buy"    },
-    { id: "pg",     label: "PG / Hostel",     icon: <MapPinIcon />,  desc: "Discover or list PG accommodations near you",       link: "/Rent/pg"     },
+    { id: "sell",   label: "Sell Property",   icon: <HomeIcon />,    desc: "List your property and reach thousands of buyers",  link: "/rent/sell"   },
+    { id: "buy",    label: "Buy Property",    icon: <BuildingIcon />,desc: "Browse verified properties ready for purchase",      link: "/rent/buy"    },
+    { id: "pg",     label: "PG / Hostel",     icon: <MapPinIcon />,  desc: "Discover or list PG accommodations near you",       link: "/rent/pg"     },
   ];
 
   const stats = [

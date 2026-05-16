@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import PlacesInput from "@/app/_component/Input";
+import PlacesInput from "@/app/components/PlacesInput";
 import { useAuth } from "@/app/context/AuthContext";
 import { useS3Upload } from "@/lib/hooks/useS3Upload";
 
@@ -256,7 +256,7 @@ export default function Rent() {
   // ── Auth redirect (safe — inside useEffect) ──────────────────────────────────
   useEffect(() => {
     if (!user) {
-      router.push("/Login");
+      router.push("/login");
     }
   }, [user, router]);
 
@@ -426,7 +426,7 @@ export default function Rent() {
               setPropertyType(null);
               setStep(0);
               setShowPlanScreen(false);
-              router.push("/Rent");
+              router.push("/rent");
             }}
             className="mt-4 px-6 py-2.5 bg-[#639922] text-white rounded-xl font-semibold hover:bg-[#507a1b] transition"
           >
@@ -506,7 +506,7 @@ export default function Rent() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-white to-[#f0f7e6] p-6">
         <div className="max-w-2xl mx-auto">
-          <button onClick={() => router.push("/Rent")} className="text-sm text-[#639922] flex items-center gap-1 mb-8 hover:underline">← Back</button>
+          <button onClick={() => router.push("/rent")} className="text-sm text-[#639922] flex items-center gap-1 mb-8 hover:underline">← Back</button>
           <h2 className="text-3xl font-black text-gray-900 mb-2">
             {isPG ? "Select PG / Hostel Type" : `Select Property Type to ${mainOption === "sell" ? "Sell" : "Buy"}`}
           </h2>
@@ -574,6 +574,12 @@ export default function Rent() {
                 <PlacesInput
                   value={form.location}
                   onChange={(val: string) => setForm((f) => ({ ...f, location: val }))}
+                  onPlaceSelect={(place) => setForm((f) => ({ 
+                    ...f, 
+                    location: place.name, 
+                    latitude: String(place.latitude), 
+                    longitude: String(place.longitude) 
+                  }))}
                   placeholder="Search location (city, area...)"
                 />
               </div>

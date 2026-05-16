@@ -129,6 +129,7 @@ export default function PlacesInput({
         },
       });
       const data = await res.json();
+      
       lat = data.location?.latitude ?? 0;
       lng = data.location?.longitude ?? 0;
     } catch (err) {

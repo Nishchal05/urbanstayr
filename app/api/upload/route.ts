@@ -1,5 +1,4 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
@@ -21,33 +20,45 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(req: NextRequest) {
-  const { filename, contentType, size } = await req.json();
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
+    
+    if (!file) {
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
 
-  // Validate on server side
-  if (!ALLOWED_TYPES.includes(contentType)) {
-    return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
+    const { name: filename, type: contentType, size } = file;
+
+    // Validate on server side
+    if (!ALLOWED_TYPES.includes(contentType)) {
+      return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
+    }
+    if (size > MAX_SIZE) {
+      return NextResponse.json({ error: "File too large" }, { status: 400 });
+    }
+
+    // Generate a unique key
+    const ext = filename.split(".").pop();
+    const key = `uploads/${uuidv4()}.${ext}`;
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME!,
+      Key: key,
+      ContentType: contentType,
+      Body: buffer,
+    });
+
+    await s3.send(command);
+
+    return NextResponse.json({
+      key,
+      publicUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
-  if (size > MAX_SIZE) {
-    return NextResponse.json({ error: "File too large" }, { status: 400 });
-  }
-
-  // Generate a unique key
-  const ext = filename.split(".").pop();
-  const key = `uploads/${uuidv4()}.${ext}`;
-
-  const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME!,
-    Key: key,
-    ContentType: contentType,
-    ContentLength: size,
-  });
-
-  // URL expires in 60 seconds — client must upload within this window
-  const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 60 });
-
-  return NextResponse.json({
-    presignedUrl,
-    key,
-    publicUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-  });
 }

@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { cookies } from "next/headers";
 import { AuthProvider } from "./context/AuthContext";
-import Navbar from "./_component/Navbar";
+import Navbar from "./components/Navbar";
 
 // Fonts
 const geistSans = Geist({

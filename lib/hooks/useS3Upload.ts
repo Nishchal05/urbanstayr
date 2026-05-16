@@ -8,25 +8,17 @@ export function useS3Upload() {
     setUploading(true);
     setProgress(0);
 
-    // Step 1: Get presigned URL from your API
+    const formData = new FormData();
+    formData.append("file", file);
+
     const res = await fetch("/api/upload", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type,
-        size: file.size,
-      }),
+      body: formData,
     });
 
-    if (!res.ok) throw new Error("Failed to get upload URL");
-    const { presignedUrl, key, publicUrl } = await res.json();
-
-    await fetch(presignedUrl, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": file.type },
-    });
+    if (!res.ok) throw new Error("Failed to upload file");
+    
+    const { key, publicUrl } = await res.json();
 
     setUploading(false);
     setProgress(100);
