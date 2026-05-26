@@ -6,7 +6,7 @@ export default async function RentPg() {
   const cookieStore = await cookies();
   const cookie = cookieStore.get("token");
   if (!cookie) {
-    redirect("/login");
+    redirect("/Login");
   }
   return (
     <RentPgHome/>

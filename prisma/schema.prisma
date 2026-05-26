@@ -77,6 +77,10 @@ model Property {
   // Type
   propertyType String
   listingType  String
+  
+  // Verification
+  isVerified Boolean @default(false)
+  verifiedBy String?  @default("")
 
   // 📊 SEO & Analytics
   clickCount       Int      @default(0)
