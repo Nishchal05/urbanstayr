@@ -39,19 +39,13 @@ model Property {
   longitude Float?
 
   // Room Features
-  singleAC     Boolean @default(false)
-  singleCooler Boolean @default(false)
-  singleTable  Boolean @default(false)
-  doubleAC     Boolean @default(false)
-  doubleCooler Boolean @default(false)
-  doubleTable  Boolean @default(false)
-  tripleAC     Boolean @default(false)
-  tripleCooler Boolean @default(false)
-  tripleTable  Boolean @default(false)
-  tripleFan    Boolean @default(false)
+  ac     Boolean @default(false)
+  cooler Boolean @default(false)
+  table  Boolean @default(false)
+  chair  Boolean @default(false)
 
   // Washroom
-  attachedWashroom Boolean @default(false)
+  attachedBathroom Boolean @default(false)
   sharingWashroom  String?
 
   // Food

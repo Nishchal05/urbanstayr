@@ -1,6 +1,13 @@
 "use client";
 
-import { Locate, MapPin, Search, X, ChevronDown } from "lucide-react";
+import {
+  Locate,
+  MapPin,
+  Search,
+  X,
+  ChevronDown,
+  Sparkles,
+} from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
@@ -53,49 +60,75 @@ export default function PlacesInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setVisible(true));
       });
+
       setTimeout(() => inputRef.current?.focus(), 200);
     } else {
       setVisible(false);
+
       const t = setTimeout(() => {
         document.body.style.overflow = "";
         setInputVal("");
         setSuggestions([]);
       }, 300);
+
       return () => clearTimeout(t);
     }
-    return () => { document.body.style.overflow = ""; };
+
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   useEffect(() => {
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, []);
 
   const fetchSuggestions = useCallback(async (input: string) => {
-    if (input.length < 2) { setSuggestions([]); setLoading(false); return; }
+    if (input.length < 2) {
+      setSuggestions([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
-        },
-        body: JSON.stringify({ input, includedRegionCodes: ["IN"] }),
-      });
+      const res = await fetch(
+        "https://places.googleapis.com/v1/places:autocomplete",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
+          },
+          body: JSON.stringify({
+            input,
+            includedRegionCodes: ["IN"],
+          }),
+        }
+      );
+
       const data = await res.json();
+
       const formatted: Suggestion[] =
         data.suggestions?.map((s: any) => ({
           placeId: s.placePrediction?.placeId,
           description: s.placePrediction?.text?.text,
         })) || [];
+
       setSuggestions(formatted);
     } catch (err) {
       console.error("Autocomplete error:", err);
@@ -105,11 +138,18 @@ export default function PlacesInput({
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const val = e.target.value;
+
     setInputVal(val);
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchSuggestions(val), 300);
+
+    debounceRef.current = setTimeout(() => {
+      fetchSuggestions(val);
+    }, 300);
   };
 
   const handleSelectCity = (city: SelectedPlace) => {
@@ -120,22 +160,36 @@ export default function PlacesInput({
 
   const handleSelectSuggestion = async (s: Suggestion) => {
     onChange(s.description);
-    let lat = 0, lng = 0;
+
+    let lat = 0;
+    let lng = 0;
+
     try {
-      const res = await fetch(`https://places.googleapis.com/v1/places/${s.placeId}`, {
-        headers: {
-          "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
-          "X-Goog-FieldMask": "location",
-        },
-      });
+      const res = await fetch(
+        `https://places.googleapis.com/v1/places/${s.placeId}`,
+        {
+          headers: {
+            "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
+            "X-Goog-FieldMask": "location",
+          },
+        }
+      );
+
       const data = await res.json();
-      
+
       lat = data.location?.latitude ?? 0;
       lng = data.location?.longitude ?? 0;
     } catch (err) {
       console.error("Place details error:", err);
     }
-    onPlaceSelect?.({ name: s.description, latitude: lat, longitude: lng, placeId: s.placeId });
+
+    onPlaceSelect?.({
+      name: s.description,
+      latitude: lat,
+      longitude: lng,
+      placeId: s.placeId,
+    });
+
     setIsOpen(false);
   };
 
@@ -143,199 +197,351 @@ export default function PlacesInput({
 
   return (
     <>
-      {/* ── Trigger ── */}
+      {/* Trigger */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center gap-2.5 text-left bg-transparent border-none p-0 cursor-pointer"
+        className={`
+          w-full rounded-2xl border bg-white px-4 py-3.5
+          transition-all duration-200
+          flex items-center justify-between gap-3
+          
+          ${
+            hasError
+              ? "border-red-400"
+              : "border-slate-200"
+          }
+        `}
       >
         <span
-          className={`flex-1 text-sm truncate ${
-            value ? "text-[#173404]" : "text-[#97C459]"
+          className={`flex-1 text-sm truncate text-left ${
+            value ? "text-slate-900" : "text-slate-400"
           }`}
         >
           {value || (placeholder ?? "Search cities, areas…")}
         </span>
-        <ChevronDown size={14} className="text-[#97C459] shrink-0" />
+        <ChevronDown size={18} className="text-slate-400 shrink-0" />
       </button>
 
-      {/* ── Portal ── */}
-      {mounted && createPortal(
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setIsOpen(false)}
-            className={`fixed inset-0 z-[998] transition-opacity duration-300 ${
-              isOpen ? "pointer-events-auto" : "pointer-events-none"
-            } ${visible ? "opacity-100" : "opacity-0"}`}
-            style={{ background: "rgba(23,52,4,0.45)" }}
-          />
+      {/* Portal */}
+      {mounted &&
+        createPortal(
+          <>
+            {/* Backdrop */}
+            <div
+              onClick={() => setIsOpen(false)}
+              className={`
+                fixed inset-0 z-[998]
+                bg-black/40 backdrop-blur-sm
+                transition-opacity duration-300
+                ${
+                  visible
+                    ? "opacity-100"
+                    : "opacity-0 pointer-events-none"
+                }
+              `}
+            />
 
-          {/* Bottom sheet */}
-          <div
-            className={`fixed left-0 right-0 bottom-0 z-[999] bg-white flex flex-col
-              rounded-t-[24px] transition-transform duration-300
-              ${visible ? "translate-y-0" : "translate-y-full"}`}
-            style={{
-              height: "82vh",
-              transitionTimingFunction: "cubic-bezier(0.32,0.72,0,1)",
-              willChange: "transform",
-            }}
-          >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3.5">
-              <div className="w-9 h-1 rounded-full bg-[#C0DD97]" />
-            </div>
+            {/* Bottom Sheet */}
+            <div
+              className={`
+                fixed inset-x-0 bottom-0 z-[999]
+                bg-white rounded-t-[32px]
+                transition-transform duration-300
+                flex flex-col
+                shadow-2xl
+                ${
+                  visible
+                    ? "translate-y-0"
+                    : "translate-y-full"
+                }
+              `}
+              style={{
+                height: "88vh",
+                transitionTimingFunction:
+                  "cubic-bezier(0.32,0.72,0,1)",
+              }}
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3">
+                <div className="w-12 h-1.5 rounded-full bg-slate-300" />
+              </div>
 
-            {/* Title row */}
-            <div className="flex items-center justify-between px-5 pt-3.5">
-              <p className="m-0 text-base font-medium text-[#173404]">
-                Select location
-              </p>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full
-                  bg-[#EAF3DE] border-none cursor-pointer text-[#3B6D11]
-                  hover:bg-[#C0DD97] transition-colors"
-              >
-                <X size={15} />
-              </button>
-            </div>
+              {/* Header */}
+              <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <Sparkles
+                          size={16}
+                          className="text-emerald-700"
+                        />
+                      </div>
 
-            {/* Search bar */}
-            <div className="px-4 pt-3.5 pb-2.5">
-              <div className="flex items-center gap-2.5 bg-[#F7FDF0] border-[1.5px]
-                border-[#3B6D11] rounded-[14px] px-3.5 py-[11px]">
-                <Search size={15} className="text-[#3B6D11] shrink-0" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputVal}
-                  onChange={handleInputChange}
-                  placeholder="Search cities, areas…"
-                  className="flex-1 border-none outline-none bg-transparent
-                    text-sm text-[#173404] placeholder:text-[#97C459]"
-                />
-                {loading && (
-                  <div
-                    className="w-4 h-4 rounded-full border-2 border-[#C0DD97]
-                      border-t-[#3B6D11] shrink-0 animate-spin"
-                  />
-                )}
-                {inputVal.length > 0 && !loading && (
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-900">
+                          Choose your location
+                        </h2>
+
+                        <p className="text-sm text-slate-500 mt-0.5">
+                          Find PGs near your preferred city
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <button
-                    onClick={() => {
-                      setInputVal("");
-                      setSuggestions([]);
-                      inputRef.current?.focus();
-                    }}
-                    className="w-5 h-5 flex items-center justify-center rounded-full
-                      bg-[#EAF3DE] border-none cursor-pointer text-[#3B6D11]
-                      hover:bg-[#C0DD97] transition-colors shrink-0"
+                    onClick={() => setIsOpen(false)}
+                    className="
+                      w-10 h-10 rounded-full
+                      bg-slate-100 hover:bg-slate-200
+                      flex items-center justify-center
+                      transition-colors
+                    "
                   >
-                    <X size={11} />
+                    <X
+                      size={18}
+                      className="text-slate-700"
+                    />
                   </button>
+                </div>
+
+                {/* Search */}
+                <div className="mt-5">
+                  <div
+                    className="
+                      flex items-center gap-3
+                      rounded-2xl border border-slate-200
+                      bg-slate-50
+                      px-4 py-3.5
+                      focus-within:border-emerald-500
+                      focus-within:bg-white
+                      focus-within:ring-4
+                      focus-within:ring-emerald-100
+                      transition-all
+                    "
+                  >
+                    <Search
+                      size={18}
+                      className="text-slate-400 shrink-0"
+                    />
+
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={inputVal}
+                      onChange={handleInputChange}
+                      placeholder="Search city, area, locality..."
+                      className="
+                        flex-1 bg-transparent outline-none
+                        text-sm text-slate-900
+                        placeholder:text-slate-400
+                      "
+                    />
+
+                    {loading && (
+                      <div
+                        className="
+                          w-5 h-5 rounded-full
+                          border-2 border-slate-300
+                          border-t-emerald-600
+                          animate-spin
+                        "
+                      />
+                    )}
+
+                    {!loading && inputVal.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setInputVal("");
+                          setSuggestions([]);
+                          inputRef.current?.focus();
+                        }}
+                        className="
+                          w-6 h-6 rounded-full
+                          bg-slate-200 hover:bg-slate-300
+                          flex items-center justify-center
+                          transition-colors
+                        "
+                      >
+                        <X
+                          size={12}
+                          className="text-slate-700"
+                        />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto px-5 py-5">
+                {showPopularCities ? (
+                  <>
+                    {/* Current Location */}
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        onUseCurrentLocation?.();
+                      }}
+                      className="
+                        w-full rounded-3xl
+                        bg-gradient-to-r from-emerald-600 to-emerald-500
+                        p-5 text-white
+                        shadow-lg shadow-emerald-200
+                        transition-all duration-200
+                        hover:scale-[1.01]
+                      "
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+                          <Locate size={24} />
+                        </div>
+
+                        <div className="text-left">
+                          <p className="text-lg font-semibold">
+                            Use Current Location
+                          </p>
+
+                          <p className="text-sm text-white/80 mt-1">
+                            Detect nearby PGs instantly
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Popular Cities */}
+                    <div className="mt-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold text-slate-900">
+                          Popular Cities
+                        </h3>
+
+                        <span className="text-xs text-slate-400">
+                          Quick Select
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {POPULAR_CITIES.map((city) => (
+                          <button
+                            key={city.name}
+                            onClick={() =>
+                              handleSelectCity(city)
+                            }
+                            className="
+                              group rounded-2xl border border-slate-200
+                              bg-white p-4
+                              hover:border-emerald-300
+                              hover:shadow-lg
+                              hover:shadow-emerald-100
+                              transition-all duration-200
+                              text-left
+                            "
+                          >
+                            <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors">
+                              <MapPin
+                                size={18}
+                                className="text-emerald-600"
+                              />
+                            </div>
+
+                            <p className="font-semibold text-slate-900 text-sm">
+                              {city.name}
+                            </p>
+
+                            <p className="text-xs text-slate-500 mt-1">
+                              Explore PGs
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-3">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Search Results
+                      </p>
+                    </div>
+
+                    {loading && (
+                      <div className="py-10 text-center">
+                        <div className="w-8 h-8 mx-auto rounded-full border-2 border-slate-300 border-t-emerald-600 animate-spin" />
+
+                        <p className="mt-4 text-sm text-slate-500">
+                          Finding locations...
+                        </p>
+                      </div>
+                    )}
+
+                    {!loading &&
+                      suggestions.length === 0 &&
+                      inputVal.length >= 2 && (
+                        <div className="py-16 text-center">
+                          <div className="w-16 h-16 rounded-2xl bg-slate-100 mx-auto flex items-center justify-center">
+                            <MapPin
+                              size={26}
+                              className="text-slate-400"
+                            />
+                          </div>
+
+                          <h3 className="mt-5 text-base font-semibold text-slate-900">
+                            No locations found
+                          </h3>
+
+                          <p className="mt-2 text-sm text-slate-500">
+                            Try searching for another city or
+                            area
+                          </p>
+                        </div>
+                      )}
+
+                    {!loading &&
+                      suggestions.map((s) => (
+                        <button
+                          key={s.placeId}
+                          onClick={() =>
+                            handleSelectSuggestion(s)
+                          }
+                          className="
+                            w-full rounded-2xl
+                            border border-transparent
+                            px-4 py-4
+                            flex items-center gap-4
+                            hover:bg-slate-50
+                            hover:border-slate-200
+                            transition-all
+                            text-left
+                          "
+                        >
+                          <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                            <MapPin
+                              size={18}
+                              className="text-emerald-600"
+                            />
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-slate-900 truncate">
+                              {s.description}
+                            </p>
+
+                            <p className="text-xs text-slate-500 mt-1">
+                              Location
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                  </>
                 )}
               </div>
             </div>
-
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-4 pb-8">
-
-              {/* Popular cities chips */}
-              {showPopularCities && (
-                <>
-                  <p className="text-[10px] font-medium text-[#3B6D11] tracking-widest
-                    uppercase mt-1 mb-3">
-                    Quick select
-                  </p>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {/* Current location box */}
-                    <button
-                      onClick={() => { setIsOpen(false); onUseCurrentLocation?.(); }}
-                      className="flex flex-col justify-center items-center gap-2 p-3 rounded-[16px]
-                        bg-[#639922] border-none text-white text-[13px] sm:text-sm font-semibold
-                        cursor-pointer hover:bg-[#3B6D11] hover:shadow-md hover:-translate-y-0.5 transition-all w-full aspect-[4/3]"
-                    >
-                      <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-1">
-                        <Locate size={18} />
-                      </div>
-                      <span className="text-center leading-tight tracking-wide">Current<br/>Location</span>
-                    </button>
-
-                    {/* City boxes */}
-                    {POPULAR_CITIES.map((city) => (
-                      <button
-                        key={city.name}
-                        onClick={() => handleSelectCity(city)}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-[16px]
-                          border border-[#C0DD97] bg-white text-[#173404]
-                          text-[13px] sm:text-sm font-semibold cursor-pointer
-                          hover:border-[#639922] hover:bg-[#F7FDF0] hover:shadow-md hover:-translate-y-0.5 transition-all w-full aspect-[4/3]"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-[#EAF3DE] flex items-center justify-center mb-1 group-hover:bg-[#C0DD97] transition-colors">
-                          <MapPin size={18} className="text-[#639922]" />
-                        </div>
-                        {city.name}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Divider */}
-              {!showPopularCities && (
-                <div className="h-px bg-[#EAF3DE] my-3" />
-              )}
-
-              {/* Search results */}
-              {!showPopularCities && (
-                <>
-                  {loading && (
-                    <p className="text-[13px] text-[#639922] px-1 py-3">
-                      Searching…
-                    </p>
-                  )}
-
-                  {!loading && suggestions.length === 0 && inputVal.length >= 2 && (
-                    <div className="text-center py-8">
-                      <p className="text-sm text-[#639922] m-0">No results found</p>
-                      <p className="text-xs text-[#97C459] mt-1 m-0">
-                        Try a different city or area
-                      </p>
-                    </div>
-                  )}
-
-                  {!loading && suggestions.map((s) => (
-                    <button
-                      key={s.placeId}
-                      onClick={() => handleSelectSuggestion(s)}
-                      className="w-full flex items-center gap-3 px-1 py-2.5
-                        bg-transparent border-none border-b border-[#EAF3DE]
-                        cursor-pointer text-left hover:bg-[#F7FDF0]
-                        transition-colors rounded-lg"
-                    >
-                      <div className="w-[34px] h-[34px] rounded-full bg-[#EAF3DE]
-                        flex items-center justify-center shrink-0">
-                        <MapPin size={14} className="text-[#3B6D11]" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="m-0 text-sm text-[#173404] truncate">
-                          {s.description}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-
-          <style>{`@keyframes pi-spin { to { transform: rotate(360deg); } }`}</style>
-        </>,
-        document.body
-      )}
+          </>,
+          document.body
+        )}
     </>
   );
 }

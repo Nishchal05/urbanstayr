@@ -31,7 +31,7 @@ const [location,setLocation]=useState('');
   return (
     <>
       {/* Main Navbar */}
-      <nav className="w-[90%] max-w-[900px] mx-auto my-5 bg-white/70 backdrop-blur-lg border border-green-700/20 rounded-full flex justify-between items-center pl-6 pr-2 py-2 shadow-sm relative z-50">
+      <nav className="w-[90%] max-w-[950px] mx-auto my-5 bg-white/70 backdrop-blur-lg border border-green-700/20 rounded-full flex justify-between items-center pl-6 pr-6 py-2 shadow-sm relative z-50">
 
         {/* Brand & Search */}
         <div className="flex flex-1 items-center gap-2 sm:gap-4 min-w-0">
@@ -44,12 +44,12 @@ const [location,setLocation]=useState('');
             </span>
           </Link>
 
-          <div className="flex flex-1 max-w-[260px] items-center bg-white/50 border border-green-700/30 hover:border-green-800 rounded-full px-3 py-1.5 transition-colors min-w-0">
+          <div className="flex flex-1 max-w-[320px] items-center bg-white/50 border border-green-700/30 hover:border-green-800 rounded-full px-3 py-1 transition-colors min-w-0">
             <svg className="text-green-800 shrink-0 hidden sm:block mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" 
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9L12 15L18 9"/>
             </svg>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <PlacesInput 
                 value={location}
                 onChange={setLocation}
@@ -58,10 +58,6 @@ const [location,setLocation]=useState('');
             </div>
           </div>
         </div>
-        
-        {/* Search Bar */}
-        
-        {/* Desktop */}
         <div className="hidden md:flex items-center gap-1">
           {[ 
             { icon: <Bell size={18} />, label: "Notifications" },
