@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 import {
     MapPin,
@@ -37,6 +37,7 @@ interface Property {
 }
 
 export default function PropertyList() {
+    const router = useRouter();
     const params = useParams();
     const type = typeof params?.type === "string" ? params.type : "pg";
 
@@ -74,7 +75,7 @@ export default function PropertyList() {
             const matchesType =
                 selectedType === "All" ||
                 prop.propertyType.toLowerCase() ===
-                    selectedType.toLowerCase();
+                selectedType.toLowerCase();
 
             const matchesBudget =
                 maxBudget === 50000 || prop.rent <= maxBudget;
@@ -182,14 +183,14 @@ export default function PropertyList() {
 
                         {(selectedType !== "All" ||
                             maxBudget !== 50000) && (
-                            <button
-                                onClick={resetFilters}
-                                className="flex items-center gap-2 rounded-xl border border-red-100 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
-                            >
-                                <RotateCcw size={14} />
-                                Reset
-                            </button>
-                        )}
+                                <button
+                                    onClick={resetFilters}
+                                    className="flex items-center gap-2 rounded-xl border border-red-100 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                >
+                                    <RotateCcw size={14} />
+                                    Reset
+                                </button>
+                            )}
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2">
@@ -208,11 +209,10 @@ export default function PropertyList() {
                                             onClick={() =>
                                                 setSelectedType(item)
                                             }
-                                            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
-                                                selectedType === item
+                                            className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${selectedType === item
                                                     ? "bg-green-800 text-white shadow-md"
                                                     : "border border-gray-200 bg-white text-gray-600 hover:border-green-300 hover:text-green-800"
-                                            }`}
+                                                }`}
                                         >
                                             {item}
                                         </button>
@@ -367,7 +367,6 @@ export default function PropertyList() {
 
                                     {/* CONTENT */}
                                     <div className="p-5">
-
                                         <div className="mb-2 flex items-center gap-2 text-sm">
                                             <span className="rounded-full bg-[#f0f8e8] px-3 py-1 font-medium text-[#639922]">
                                                 {prop.propertyType}
@@ -377,7 +376,6 @@ export default function PropertyList() {
                                                 {prop.listingType}
                                             </span>
                                         </div>
-
                                         <h3 className="line-clamp-1 text-lg font-bold text-gray-900">
                                             {prop.name}
                                         </h3>
@@ -392,17 +390,13 @@ export default function PropertyList() {
                                                     `, ${prop.area}`}
                                             </span>
                                         </div>
-
-                                        {/* AMENITIES */}
                                         <div className="mt-5 flex flex-wrap gap-2">
-
                                             {prop.ac && (
                                                 <Amenity
                                                     icon={<Wind size={14} />}
                                                     label="AC"
                                                 />
                                             )}
-
                                             {prop.kitchen && (
                                                 <Amenity
                                                     icon={
@@ -411,14 +405,12 @@ export default function PropertyList() {
                                                     label="Kitchen"
                                                 />
                                             )}
-
                                             {prop.parking && (
                                                 <Amenity
                                                     icon={<Car size={14} />}
                                                     label="Parking"
                                                 />
                                             )}
-
                                             {prop.washingMachine && (
                                                 <Amenity
                                                     icon={
@@ -430,10 +422,7 @@ export default function PropertyList() {
                                                 />
                                             )}
                                         </div>
-
-                                        {/* FOOTER */}
                                         <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-5">
-
                                             <div>
                                                 <p className="text-xs text-gray-400">
                                                     Starting From
@@ -448,7 +437,10 @@ export default function PropertyList() {
                                                 </h3>
                                             </div>
 
-                                            <button className="flex items-center gap-1 rounded-xl bg-green-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-[#639922]">
+                                            <button className="flex items-center gap-1 rounded-xl bg-green-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-[#639922]"
+                                             onClick={()=>{
+                                                router.push(`/propertydetail/${prop.id}`)
+                                             }}>
                                                 Details
                                                 <ChevronRight size={16} />
                                             </button>

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { userid } = await params;
   try {
     const userdata = await prisma.user.findUnique({
-      where: { id: userid },
+      where: { id: String(userid) },
     });
     return NextResponse.json(userdata, { status: 200 });
   } catch (error) {
