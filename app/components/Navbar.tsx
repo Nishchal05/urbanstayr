@@ -140,14 +140,14 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/login"
+                href="/Login"
                 className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full ml-1"
               >
                 Login
               </Link>
 
               <Link
-                href="/signup"
+                href="/Signup"
                 className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full ml-0.5"
               >
                 Register
@@ -194,11 +194,11 @@ export default function Navbar() {
               </button>
             ) : (
               <>
-                <Link href="/login" onClick={() => setMenuOpen(false)}>
+                <Link href="/Login" onClick={() => setMenuOpen(false)}>
                   Login
                 </Link>
 
-                <Link href="/signup" onClick={() => setMenuOpen(false)}>
+                <Link href="/Signup" onClick={() => setMenuOpen(false)}>
                   Register
                 </Link>
               </>
