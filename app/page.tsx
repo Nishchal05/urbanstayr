@@ -1,13 +1,12 @@
-import Image from "next/image";
-import LandingHeroSection from "./components/LandingHeroSection";
+
 import RentYourProperty from "./components/RentYourProperty";
+import PropertyList from "./components/PropertyList";
 
 export default function Home() {
   return (
     <div>
-    <RentYourProperty/>
-     
-     
+      <RentYourProperty />
+      <PropertyList />
     </div>
   );
 }

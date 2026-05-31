@@ -187,3 +187,8 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+// GET Property
+
+export async function GET(){
+  
+}

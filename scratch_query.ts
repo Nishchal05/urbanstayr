@@ -1,0 +1,15 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const properties = await prisma.property.findMany({
+    take: 5,
+  });
+  console.log("PROPERTIES IN DB:");
+  console.log(JSON.stringify(properties, null, 2));
+}
+
+main()
+  .catch((e) => console.error(e))
+  .finally(() => prisma.$disconnect());
