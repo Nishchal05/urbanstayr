@@ -142,7 +142,7 @@ export default function PropertyList() {
                             Find your next stay
                         </p>
 
-                        <h1 className="text-4xl font-bold capitalize tracking-tight text-green-900 md:text-5xl">
+                        <h1 className="text-2xl font-bold capitalize tracking-tight text-green-900 md:text-4xl">
                             {type === "pg"
                                 ? "PG & Hostel Properties"
                                 : `${type} Properties`}
@@ -159,7 +159,7 @@ export default function PropertyList() {
                             Available Properties
                         </p>
 
-                        <h3 className="text-2xl font-bold text-green-800">
+                        <h3 className="text-xl font-bold text-green-800">
                             {filteredProperties.length}
                         </h3>
                     </div>
@@ -175,7 +175,7 @@ export default function PropertyList() {
                                 size={20}
                             />
 
-                            <h2 className="text-lg font-semibold text-gray-900">
+                            <h2 className="text-md font-semibold text-gray-900">
                                 Filters
                             </h2>
                         </div>
@@ -281,7 +281,7 @@ export default function PropertyList() {
                 {!loading && filteredProperties.length === 0 && (
                     <div className="rounded-3xl border border-dashed border-green-200 bg-green-50 py-20 text-center">
 
-                        <h2 className="text-2xl font-bold text-green-900">
+                        <h2 className="text-xl font-bold text-green-900">
                             No properties found
                         </h2>
 
@@ -378,7 +378,7 @@ export default function PropertyList() {
                                             </span>
                                         </div>
 
-                                        <h3 className="line-clamp-1 text-xl font-bold text-gray-900">
+                                        <h3 className="line-clamp-1 text-lg font-bold text-gray-900">
                                             {prop.name}
                                         </h3>
 
