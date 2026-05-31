@@ -62,48 +62,37 @@ export default function PropertyDetails({
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
+    <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-medium text-emerald-700">
-            <Check size={14} />
+        <div className="mb-5">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700">
+            <Check size={12} />
             Property Setup
           </div>
 
-          <h1 className="mt-4 text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
+          <h1 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
             Add Property Details
           </h1>
 
-          <p className="mt-3 text-sm sm:text-base text-slate-600 max-w-2xl">
+          <p className="mt-1.5 text-xs text-slate-500 max-w-xl">
             Fill in your PG information so students and professionals can
             discover your property easily.
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8 shadow-sm">
-          <div className="grid grid-cols-1 gap-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+          <div className="grid grid-cols-1 gap-4">
             {/* PG Name */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                 Property / PG Name
               </label>
 
-              <div
-                className="
-                  flex items-center gap-3
-                  rounded-2xl border border-slate-200
-                  bg-slate-50 px-4 py-3.5
-                  transition-all
-                  focus-within:border-emerald-500
-                  focus-within:bg-white
-                  focus-within:ring-4
-                  focus-within:ring-emerald-100
-                "
-              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 shrink-0">
-                  <Building2 size={20} />
+              <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
+                  <Building2 size={15} />
                 </div>
 
                 <input
@@ -111,63 +100,39 @@ export default function PropertyDetails({
                   placeholder="e.g. Sunrise PG for Girls"
                   value={form.pgName}
                   onChange={set("pgName")}
-                  className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+                  className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                 />
               </div>
             </div>
 
             {/* Sector + Street */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Sector */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-800">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                   Sector
                 </label>
-
-                <div
-                  className="
-                    rounded-2xl border border-slate-200
-                    bg-slate-50 px-4 py-3.5
-                    transition-all
-                    focus-within:border-emerald-500
-                    focus-within:bg-white
-                    focus-within:ring-4
-                    focus-within:ring-emerald-100
-                  "
-                >
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
                   <input
                     type="text"
                     placeholder="e.g. Sector 22"
                     value={form.sector}
                     onChange={set("sector")}
-                    className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
-              {/* Street */}
               <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-800">
+                <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                   Street / Road
                 </label>
-
-                <div
-                  className="
-                    rounded-2xl border border-slate-200
-                    bg-slate-50 px-4 py-3.5
-                    transition-all
-                    focus-within:border-emerald-500
-                    focus-within:bg-white
-                    focus-within:ring-4
-                    focus-within:ring-emerald-100
-                  "
-                >
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
                   <input
                     type="text"
                     placeholder="e.g. MG Road"
                     value={form.street}
                     onChange={set("street")}
-                    className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+                    className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -175,28 +140,14 @@ export default function PropertyDetails({
 
             {/* Area */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                 Area / Locality
               </label>
-
-              <div
-                className="
-                  rounded-2xl border border-slate-200
-                  bg-slate-50 p-2
-                  transition-all
-                  focus-within:border-emerald-500
-                  focus-within:bg-white
-                  focus-within:ring-4
-                  focus-within:ring-emerald-100
-                "
-              >
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
                 <PlacesInput
                   value={form.area}
                   onChange={(val) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      area: val,
-                    }))
+                    setForm((prev) => ({ ...prev, area: val }))
                   }
                   onPlaceSelect={(place) =>
                     setForm((prev) => ({
@@ -213,30 +164,15 @@ export default function PropertyDetails({
 
             {/* Contact */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
+              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                 Contact Number
               </label>
-
-              <div
-                className="
-                  flex items-center overflow-hidden
-                  rounded-2xl border border-slate-200
-                  bg-slate-50
-                  transition-all
-                  focus-within:border-emerald-500
-                  focus-within:bg-white
-                  focus-within:ring-4
-                  focus-within:ring-emerald-100
-                "
-              >
-                <div className="flex items-center gap-3 border-r border-slate-200 px-4 py-3.5 shrink-0">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                    <Phone size={18} />
+              <div className="flex items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
+                <div className="flex items-center gap-2 border-r border-slate-200 px-3 py-2.5 shrink-0">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                    <Phone size={13} />
                   </div>
-
-                  <span className="text-sm font-semibold text-slate-700">
-                    +91
-                  </span>
+                  <span className="text-xs font-semibold text-slate-700">+91</span>
                 </div>
 
                 <input
@@ -245,25 +181,24 @@ export default function PropertyDetails({
                   placeholder="98765 43210"
                   value={form.contact}
                   onChange={set("contact")}
-                  className="flex-1 bg-transparent px-4 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+                  className="flex-1 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                 />
               </div>
             </div>
 
             {/* Location Preview */}
             {form.area && (
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm shrink-0">
-                    <MapPin size={20} />
+              <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-emerald-700 shadow-sm shrink-0">
+                    <MapPin size={14} />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-emerald-900">
+                    <p className="text-xs font-semibold text-emerald-900">
                       Selected Location
                     </p>
-
-                    <p className="mt-1 text-sm text-emerald-700 break-words">
+                    <p className="mt-0.5 text-xs text-emerald-700 break-words">
                       {form.area}
                     </p>
                   </div>
@@ -272,40 +207,21 @@ export default function PropertyDetails({
             )}
 
             {/* Footer */}
-            <div className="mt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="mt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setflowno((prev: number) => prev - 1);
-                }}
-                className="
-                  w-full sm:w-auto
-                  rounded-2xl border border-slate-300
-                  bg-white px-6 py-3
-                  text-sm font-semibold text-slate-700
-                  hover:bg-slate-50
-                  transition-all
-                "
+                onClick={() => setflowno((prev: number) => prev - 1)}
+                className="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all"
               >
-                
                 Back
               </button>
 
               <button
                 onClick={handleSubmit}
-                className="
-                  w-full sm:w-auto
-                  rounded-2xl bg-emerald-600
-                  px-8 py-3
-                  text-sm font-semibold text-white
-                  shadow-lg shadow-emerald-200
-                  hover:bg-emerald-700 hover:scale-[1.01]
-                  transition-all duration-300
-                  flex items-center justify-center gap-2
-                "
+                className="w-full sm:w-auto rounded-xl bg-green-800 px-6 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-200 hover:bg-emerald-700 hover:scale-[1.01] transition-all duration-300 flex items-center justify-center gap-1.5"
               >
                 Save & Continue
-                <ChevronRight size={18} />
+                <ChevronRight size={15} />
               </button>
             </div>
           </div>

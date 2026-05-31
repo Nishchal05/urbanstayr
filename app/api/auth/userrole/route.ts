@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 export async function GET() {
   try {
     const session = await getSession();
-    
+
     if (!session || !session.role) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -14,6 +14,7 @@ export async function GET() {
 
     return NextResponse.json({
       role: session.role,
+      userId: session.userId,
     });
   } catch (error) {
     console.error("Failed to fetch user role:", error);

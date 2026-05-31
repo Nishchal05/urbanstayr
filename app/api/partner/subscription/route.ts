@@ -9,15 +9,15 @@ const PLANS = [
   { id: "pro",     durationMonths: 9 },
 ];
 
-// ── Shared helper ─────────────────────────────────────────────────────────────
-async function getUserId(): Promise<number | null> {
+
+async function getUserId(): Promise<string | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
   if (!token) return null;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number };
-    return decoded.userId ?? null;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string | number };
+    return decoded.userId != null ? String(decoded.userId) : null;
   } catch {
     return null;
   }
@@ -32,7 +32,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const user = await prisma.user.findFirst({
-      where: { id },
+      where: { id: String(id) },
       select: { subscription: true },
     });
 
@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest) {
     ending.setMonth(ending.getMonth() + matched.durationMonths);
 
     await prisma.user.update({
-      where: { id },
+      where: { id: String(id) },
       data: {
         subscription: plan,
         subscriptionstarting: now,

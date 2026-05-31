@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
+  id    String  @id @default(uuid())
   email String  @unique
   name  String?
   password String
@@ -98,7 +98,7 @@ model Property {
   boostMultiplier  Float     @default(1.0) // e.g. 1.5 = 50% boost
 
   // 🔥 Relation
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
