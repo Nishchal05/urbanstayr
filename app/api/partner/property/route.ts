@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
         electricity: getInt("electricity"),
         propertyType: getString("propertyType") || "",
         listingType: getString("listingType") || "",
+        description: getString("description"),
       };
     } else {
       // JSON body fallback

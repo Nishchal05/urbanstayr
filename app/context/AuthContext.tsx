@@ -13,7 +13,7 @@ export const AuthProvider = ({
   initialUser,
 }: {
   children: ReactNode;
-  initialUser: boolean; // ⚠️ THIS MUST EXIST
+  initialUser: boolean; 
 }) => {
   const [user, setUser] = useState<boolean>(initialUser);
 

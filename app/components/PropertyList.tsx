@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 
 import {
     MapPin,
@@ -39,7 +39,9 @@ interface Property {
 export default function PropertyList() {
     const router = useRouter();
     const params = useParams();
-    const type = typeof params?.type === "string" ? params.type : "pg";
+    const searchParams = useSearchParams();
+    const type = typeof params?.type === "string" ? params.type : "all";
+    const locationParam = searchParams.get("location")?.toLowerCase() || "";
 
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
@@ -70,19 +72,48 @@ export default function PropertyList() {
         }
     };
 
+    useEffect(() => {
+        if (loading || properties.length === 0) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('data-id');
+                        if (id) {
+                            axios.post('/api/property/analytics', { propertyId: parseInt(id), event: 'impression' }).catch(() => null);
+                            observer.unobserve(entry.target);
+                        }
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        const elements = document.querySelectorAll('.property-card');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [loading, properties]);
+
     const filteredProperties = useMemo(() => {
         return properties.filter((prop) => {
             const matchesType =
                 selectedType === "All" ||
-                prop.propertyType.toLowerCase() ===
-                selectedType.toLowerCase();
+                (prop.listingType && prop.listingType.toLowerCase() === selectedType.toLowerCase());
 
             const matchesBudget =
                 maxBudget === 50000 || prop.rent <= maxBudget;
 
-            return matchesType && matchesBudget;
+            const matchesLocation = 
+                !locationParam || 
+                (prop.name?.toLowerCase() || "").includes(locationParam) ||
+                (prop.sector?.toLowerCase() || "").includes(locationParam) ||
+                (prop.area?.toLowerCase() || "").includes(locationParam);
+
+            return matchesType && matchesBudget && matchesLocation;
         });
-    }, [properties, selectedType, maxBudget]);
+    }, [properties, selectedType, maxBudget, locationParam]);
 
     const toggleFavorite = (id: number) => {
         setFavorites((prev) =>
@@ -308,7 +339,8 @@ export default function PropertyList() {
                             return (
                                 <div
                                     key={prop.id}
-                                    className="group overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                                    data-id={prop.id}
+                                    className="property-card group overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                 >
 
                                     {/* IMAGE */}
@@ -439,6 +471,7 @@ export default function PropertyList() {
 
                                             <button className="flex items-center gap-1 rounded-xl bg-green-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-[#639922]"
                                              onClick={()=>{
+                                                axios.post('/api/property/analytics', { propertyId: prop.id, event: 'click' }).catch(() => null);
                                                 router.push(`/propertydetail/${prop.id}`)
                                              }}>
                                                 Details

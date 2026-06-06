@@ -198,30 +198,46 @@ export default function PlacesInput({
   return (
     <>
       {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
+      <div
         className={`
           w-full rounded-2xl border bg-white px-4 py-3.5
           transition-all duration-200
           flex items-center justify-between gap-3
+          cursor-pointer
           
           ${
             hasError
               ? "border-red-400"
-              : "border-slate-200"
+              : "border-slate-200 hover:border-emerald-300"
           }
         `}
+        onClick={() => setIsOpen(true)}
       >
         <span
           className={`flex-1 text-sm truncate text-left ${
-            value ? "text-slate-900" : "text-slate-400"
+            value ? "text-slate-900 font-medium" : "text-slate-400"
           }`}
         >
           {value || (placeholder ?? "Search cities, areas…")}
         </span>
-        <ChevronDown size={18} className="text-slate-400 shrink-0" />
-      </button>
+        
+        {value ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange("");
+              onPlaceSelect?.({ name: "", latitude: 0, longitude: 0 });
+            }}
+            className="flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full p-1 transition-colors shrink-0"
+            title="Clear location"
+          >
+            <X size={14} />
+          </button>
+        ) : (
+          <ChevronDown size={18} className="text-slate-400 shrink-0" />
+        )}
+      </div>
 
       {/* Portal */}
       {mounted &&
@@ -382,8 +398,67 @@ export default function PlacesInput({
                     {/* Current Location */}
                     <button
                       onClick={() => {
-                        setIsOpen(false);
-                        onUseCurrentLocation?.();
+                        if (onUseCurrentLocation) {
+                          setIsOpen(false);
+                          onUseCurrentLocation();
+                          return;
+                        }
+                        
+                        if ("geolocation" in navigator) {
+                          setLoading(true);
+                          navigator.geolocation.getCurrentPosition(
+                            async (position) => {
+                              const lat = position.coords.latitude;
+                              const lng = position.coords.longitude;
+                              try {
+                                let cityName = "";
+                                const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`);
+                                const data = await res.json();
+                                
+                                if (data.status === "OK" && data.results && data.results.length > 0) {
+                                  // try to find locality first
+                                  for (const result of data.results) {
+                                    const locality = result.address_components.find((c: any) => c.types.includes("locality"));
+                                    if (locality) {
+                                      cityName = locality.long_name;
+                                      break;
+                                    }
+                                  }
+                                  if (!cityName) cityName = data.results[0].formatted_address;
+                                } else {
+                                  // Fallback to OpenStreetMap if Google Geocoding API is not enabled
+                                  const osmRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                                  const osmData = await osmRes.json();
+                                  cityName = osmData.address?.city || osmData.address?.town || osmData.address?.village || osmData.address?.state_district || "";
+                                }
+                                
+                                if (cityName) {
+                                  onChange(cityName);
+                                  onPlaceSelect?.({
+                                    name: cityName,
+                                    latitude: lat,
+                                    longitude: lng,
+                                  });
+                                } else {
+                                  alert("Could not determine city name from coordinates.");
+                                }
+                              } catch (err) {
+                                console.error("Geocoding error:", err);
+                                alert("Failed to get location name.");
+                              } finally {
+                                setLoading(false);
+                                setIsOpen(false);
+                              }
+                            },
+                            (error) => {
+                              console.error("Geolocation error:", error);
+                              alert("Location access denied or unavailable.");
+                              setLoading(false);
+                            }
+                          );
+                        } else {
+                          alert("Geolocation is not supported by your browser.");
+                        }
                       }}
                       className="
                         w-full rounded-3xl

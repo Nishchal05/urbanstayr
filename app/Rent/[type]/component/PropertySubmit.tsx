@@ -7,6 +7,7 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default function PropertySubmit() {
   return (
@@ -114,6 +115,9 @@ export default function PropertySubmit() {
                 transition-all duration-300
                 hover:scale-[1.02] hover:bg-emerald-700
               "
+              onClick={()=>{
+                redirect("/partner/dashboard")
+              }}
             >
               Go to Dashboard
               <ArrowRight size={18} />

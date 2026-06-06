@@ -22,13 +22,38 @@ export default function Navbar() {
   const [displaydashboard, setdisplaydashboard] = useState(false);
   const [location, setLocation] = useState("");
   const [id,setid]=useState("");
-  const router = useRouter();
   const { user, setUser } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const loc = params.get("location");
+      if (loc) {
+        setLocation(loc);
+      }
+    }
+  }, []);
+
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (val) {
+        params.set("location", val);
+      } else {
+        params.delete("location");
+      }
+      router.push(`${window.location.pathname}?${params.toString()}`);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       await axios.post("/api/auth/logout");
       setUser(false);
+      setrole("");
+      setid("");
       router.push("/login");
     } catch (err) {
       console.error("Failed to log out", err);
@@ -40,7 +65,6 @@ export default function Navbar() {
       const res = await axios.get("/api/auth/userrole");
       setrole(res.data.role);
       setid(res.data.userId);
-      console.log(res.data);
     } catch (error) {
       console.error("Failed to fetch role:", error);
     }
@@ -83,7 +107,7 @@ export default function Navbar() {
             <div className="flex-1">
               <PlacesInput
                 value={location}
-                onChange={setLocation}
+                onChange={handleLocationChange}
                 placeholder="Search..."
               />
             </div>
@@ -109,14 +133,14 @@ export default function Navbar() {
             </button>
           ))}
 
-          {role === "partner" && (
+          { role !== "" && (
             <div
               className="relative"
               onMouseEnter={() => setdisplaydashboard(true)}
               onMouseLeave={() => setdisplaydashboard(false)}
             >
               <Link
-                href={`/partner/dashboard?id=${id}`}
+                href={`/${role}/dashboard?id=${id}`}
                 className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-4 py-2 rounded-full ml-1 flex items-center justify-center"
               >
                 <LayoutDashboardIcon size={18} />
@@ -140,14 +164,14 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/Login"
+                href="/login"
                 className="text-sm font-medium text-green-800 border border-green-700/40 hover:bg-green-600/10 px-5 py-1.5 rounded-full ml-1"
               >
                 Login
               </Link>
 
               <Link
-                href="/Signup"
+                href="/signup"
                 className="text-sm font-medium text-white bg-green-800 hover:bg-green-900 px-5 py-1.5 rounded-full ml-0.5"
               >
                 Register

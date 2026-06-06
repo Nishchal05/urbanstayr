@@ -45,6 +45,8 @@ export async function GET() {
         propertyType: true,
         listingType: true,
         isVerified: true,
+        status: true,
+        rejectionReason: true,
         isBoosted: true,
         clickCount: true,
         impressionCount: true,

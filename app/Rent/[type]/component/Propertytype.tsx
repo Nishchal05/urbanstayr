@@ -1,38 +1,34 @@
 import { useState, Dispatch, SetStateAction } from "react";
-import { Check } from "lucide-react";
+import { Check, Building2, Home, Building } from "lucide-react";
 
-interface PgSharingProps {
-  Property: any;
+interface PropertytypeProps {
   setProperty: Dispatch<SetStateAction<any>>;
   setflowno: Dispatch<SetStateAction<number>>;
 }
 
-const sharing = [
+const propertyTypes = [
   {
-    id: "single",
-    title: "Single Sharing",
-    beds: 1,
-    icon: "🛏️",
-    desc: "Private space for maximum comfort",
+    id: "pg",
+    title: "PG",
+    icon: <Building2 className="w-8 h-8" />,
+    desc: "Paying guest accommodation with amenities",
   },
   {
-    id: "double",
-    title: "Double Sharing",
-    beds: 2,
-    icon: "🛏️🛏️",
-    desc: "Perfect balance of privacy & affordability",
+    id: "hostel",
+    title: "Hostel",
+    icon: <Building className="w-8 h-8" />,
+    desc: "Budget-friendly student & working professional housing",
   },
   {
-    id: "triple",
-    title: "Triple Sharing",
-    beds: 3,
-    icon: "🛏️🛏️🛏️",
-    desc: "Budget-friendly and social living",
+    id: "flat",
+    title: "Flat",
+    icon: <Home className="w-8 h-8" />,
+    desc: "Independent apartments and private flats",
   },
 ];
 
-export default function PgSharing({ Property, setProperty, setflowno }: PgSharingProps) {
-  const [selected, setSelected] = useState<string>(Property?.propertyType || "double");
+export default function Propertytype({ setProperty, setflowno }: PropertytypeProps) {
+  const [selected, setSelected] = useState<string>("pg");
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 px-4 py-6 sm:px-6 lg:px-8">
@@ -40,17 +36,17 @@ export default function PgSharing({ Property, setProperty, setflowno }: PgSharin
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 mb-3">
-            Sharing Type
+            Property Category
           </div>
 
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            Choose Room Sharing Type
+            Choose Your Property Type
           </h1>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {sharing.map((item) => {
+          {propertyTypes.map((item) => {
             const isActive = selected === item.id;
 
             return (
@@ -77,24 +73,15 @@ export default function PgSharing({ Property, setProperty, setflowno }: PgSharin
                 </div>
 
                 {/* Icon */}
-                <div className="mb-4 text-2xl">{item.icon}</div>
+                <div className={`mb-4 text-2xl ${isActive ? "text-green-600" : "text-slate-400 group-hover:text-green-500"} transition-colors`}>
+                  {item.icon}
+                </div>
 
                 {/* Title */}
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-sm font-semibold text-slate-900">
                     {item.title}
                   </h3>
-
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold
-                    ${
-                      isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {item.beds} Person{item.beds > 1 ? "s" : ""}
-                  </span>
                 </div>
 
                 {/* Description */}
@@ -103,14 +90,7 @@ export default function PgSharing({ Property, setProperty, setflowno }: PgSharin
                 </p>
 
                 {/* Footer */}
-                <div className="mt-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-slate-500">Capacity</p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {item.beds} Bed{item.beds > 1 ? "s" : ""}
-                    </p>
-                  </div>
-
+                <div className="mt-4 flex items-center justify-end">
                   <div
                     className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all
                     ${
@@ -128,23 +108,12 @@ export default function PgSharing({ Property, setProperty, setflowno }: PgSharin
         </div>
 
         {/* CTA */}
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => {
-              setProperty((prev: any) => ({ ...prev, propertyType: selected }));
-              setflowno((prev: number) => prev - 1);
-            }}
-            className="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-6 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all"
-          >
-            Back
-          </button>
-          
+        <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <button
             disabled={!selected}
             onClick={() => {
-              setProperty((prev: any) => ({ ...prev, propertyType: selected }));
-              setflowno((prev: number) => prev + 1);
+              setProperty((prev: any) => ({ ...prev, listingType: selected }));
+              setflowno((prev: any) => prev + 1);
             }}
             className="w-full sm:w-auto rounded-xl bg-green-800 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all duration-300 hover:bg-emerald-700 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
           >

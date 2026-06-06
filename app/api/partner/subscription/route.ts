@@ -43,7 +43,7 @@ export async function GET() {
   }
 }
 
-// ── PUT /api/setsubscription ──────────────────────────────────────────────────
+// ── PUT /api/partner/subscription ──────────────────────────────────────────────────
 export async function PUT(request: NextRequest) {
   try {
     const id = await getUserId();
@@ -55,6 +55,7 @@ export async function PUT(request: NextRequest) {
     const { plan } = await request.json();
 
     const matched = PLANS.find((p) => p.id === plan);
+    console.log(matched);
     if (!matched) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }

@@ -42,7 +42,7 @@ function getAllPhotos(prop: any): string[] {
 export default function PropertyDetail() {
     const params = useParams();
     const router = useRouter();
-    const id = params?.propertyid;
+    const id = params?.id;
 
     const [property, setProperty] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -127,24 +127,32 @@ export default function PropertyDetail() {
 
     return (
         <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12">
+            {/* Partner Dashboard Banner */}
+            <div className="bg-amber-600 text-white text-center py-2 text-sm font-semibold tracking-wide flex items-center justify-center gap-2">
+                <Info size={16} /> Partner View - This is how your property appears to users
+            </div>
+
             {/* Top Navigation */}
             <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 py-3 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl flex items-center justify-between">
                     <button 
-                        onClick={() => router.back()}
+                        onClick={() => router.push("/partner/dashboard")}
                         className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition bg-white p-2 sm:px-4 sm:py-2 rounded-full sm:rounded-xl shadow-sm border border-gray-200"
                     >
                         <ArrowLeft size={18} />
-                        <span className="hidden sm:inline">Back to Search</span>
+                        <span className="hidden sm:inline">Back to Dashboard</span>
                     </button>
                     
-                    <div className="flex items-center gap-3">
-                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition">
-                            <Share2 size={18} />
-                        </button>
-                        <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-600 hover:text-red-500 hover:bg-red-50 transition">
-                            <Heart size={18} />
-                        </button>
+                    <div className="flex items-center gap-4 text-sm font-medium text-gray-600">
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs text-gray-400">Views</span>
+                            <span className="text-gray-900">{property.impressionCount || 0}</span>
+                        </div>
+                        <div className="h-8 w-px bg-gray-300"></div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-xs text-gray-400">Clicks</span>
+                            <span className="text-gray-900">{property.clickCount || 0}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -387,23 +395,12 @@ export default function PropertyDetail() {
                                 </div>
                             </div>
 
-                            {property.phone ? (
-                                <a 
-                                    href={`tel:${property.phone}`}
-                                    className="w-full flex items-center justify-center gap-2 bg-green-800 hover:bg-green-900 text-white font-bold py-4 rounded-2xl transition shadow-md shadow-green-800/20 active:scale-[0.98]"
-                                >
-                                    <Phone size={20} />
-                                    Contact Owner
-                                </a>
-                            ) : (
-                                <button 
-                                    disabled
-                                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-400 font-bold py-4 rounded-2xl cursor-not-allowed"
-                                >
-                                    <Phone size={20} />
-                                    Contact Unavailable
-                                </button>
-                            )}
+                            <button 
+                                className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-2xl transition shadow-md shadow-amber-600/20 active:scale-[0.98]"
+                            >
+                                <Info size={20} />
+                                Edit Property (Coming Soon)
+                            </button>
                             <p className="text-center text-xs text-gray-400 mt-4 font-medium">You won't be charged yet</p>
                         </div>
                     </div>
@@ -417,15 +414,12 @@ export default function PropertyDetail() {
                     <p className="text-sm text-gray-500 font-medium">Rent</p>
                     <p className="text-xl font-extrabold text-gray-900">{formatPrice(property.rent)}<span className="text-sm font-normal text-gray-500"> /mo</span></p>
                 </div>
-                {property.phone && (
-                    <a 
-                        href={`tel:${property.phone}`}
-                        className="flex items-center gap-2 bg-green-800 hover:bg-green-900 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-md active:scale-[0.98]"
-                    >
-                        <Phone size={18} />
-                        Call
-                    </a>
-                )}
+                <button 
+                    className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-md active:scale-[0.98]"
+                >
+                    <Info size={18} />
+                    Edit
+                </button>
             </div>
         </main>
     );

@@ -18,7 +18,7 @@ interface PricingProps {
 
 const plans = [
   {
-    id: "starter",
+    id: "free",
     name: "Starter",
     price: "Free",
     subtitle: "Perfect for getting started",
@@ -34,7 +34,7 @@ const plans = [
     highlight: false,
   },
   {
-    id: "growth",
+    id: "premium",
     name: "Growth",
     price: "₹600",
     subtitle: "Best for growing PG owners",
@@ -50,7 +50,7 @@ const plans = [
     highlight: true,
   },
   {
-    id: "premium",
+    id: "pro",
     name: "Premium",
     price: "₹1000",
     subtitle: "Built for large PG businesses",

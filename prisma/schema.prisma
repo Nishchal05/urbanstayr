@@ -20,11 +20,18 @@ model User {
   subscription         String?
   subscriptionstarting DateTime?
   subscriptionending   DateTime?
-
+  notifications Notification[]
   properties Property[]
   createdAt  DateTime @default(now())
 }
-
+ model Notification{
+  id          String @id @default(uuid())
+  userId      String
+  message     String
+  createdAt   DateTime @default(now())
+  isRead      Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 model Property {
   id     Int    @id @default(autoincrement())
   name   String
@@ -47,7 +54,7 @@ model Property {
   // Washroom
   attachedBathroom Boolean @default(false)
   sharingWashroom  String?
-
+  description String?
   // Food
   breakfast Boolean @default(false)
   lunch     Boolean @default(false)
@@ -81,6 +88,8 @@ model Property {
   // Verification
   isVerified Boolean @default(false)
   verifiedBy String?  @default("")
+  status     String  @default("PENDING")
+  rejectionReason String?
 
   // 📊 SEO & Analytics
   clickCount       Int      @default(0)
@@ -88,8 +97,7 @@ model Property {
   seoScore         Int      @default(0)
   lastClickedAt    DateTime?
   lastImpressionAt DateTime?
-  seoLastUpdatedAt DateTime? // tracks when score was last recalculated
-
+  seoLastUpdatedAt DateTime? 
   // 🚀 Boost system
   isBoosted        Boolean   @default(false)
   boostStartedAt   DateTime?
@@ -107,4 +115,26 @@ model Property {
   @@index([seoScore])
   @@index([boostEndsAt])  // cron uses this to find expired boosts fast
   @@index([seoLastUpdatedAt]) // cron uses this to find stale scores
+}
+model Employ {
+  employid        String   @id @default(uuid())
+  name            String
+  personalEmail   String   @unique
+  companyEmail    String   @unique
+  role            String
+  password        String
+  access          Access?
+  createdby      String @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Access {
+  id                  String  @id @default(uuid())
+
+  Employaccess Boolean @default(false)
+  propertyVerification Boolean @default(false)
+  accountVerification  Boolean @default(false)
+  employeeId          String  @unique
+  employee            Employ  @relation(fields: [employeeId], references: [employid])
 }

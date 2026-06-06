@@ -9,6 +9,7 @@ import PropertyPictures from "./PropertyPictures";
 import PropertyPricing from "./PropertyPricing";
 import Pricing from "@/app/components/Pricing";
 import PropertySubmit from "./PropertySubmit";
+import Propertytype from "./Propertytype";
 export default function () {
     const params = useParams();
     const type = typeof params?.type === "string" ? params.type : "";
@@ -55,14 +56,15 @@ export default function () {
     });
     return (
         <section>
-            {flowno == 0 && <PgSharing setProperty={setform} setflowno={setflowno} />}
-            {flowno == 1 && <PropertyDetails setProperty={setform} setflowno={setflowno} />}
-            {flowno == 2 && <RoomDetails  Property={form} setProperty={setform} setflowno={setflowno} />}
-            {flowno == 3 && <Food Property={form} setProperty={setform} setflowno={setflowno} />}
-            {flowno == 4 && <PropertyPictures Property={form} setProperty={setform} setflowno={setflowno} />}
-            {flowno == 5 && <PropertyPricing Property={form} setProperty={setform} setflowno={setflowno} />}
-            {flowno == 6 && <Pricing Property={form} setflowno={setflowno} />}
-            {flowno > 6 && <PropertySubmit/>}
+            {flowno == 0 && <Propertytype  setProperty={setform} setflowno={setflowno} />}
+            {flowno == 1 && <PgSharing Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 2 && <PropertyDetails Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 3 && <RoomDetails  Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 4 && <Food Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 5 && <PropertyPictures Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 6 && <PropertyPricing Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 7 && <Pricing Property={form} setflowno={setflowno} />}
+            {flowno > 7 && <PropertySubmit/>}
         </section>
     )
 }

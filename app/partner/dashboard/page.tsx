@@ -27,6 +27,8 @@ type Property = {
   propertyType: string;
   listingType: string;
   isVerified: boolean;
+  status: string;
+  rejectionReason: string | null;
   isBoosted: boolean;
   clickCount: number;
   impressionCount: number;
@@ -124,7 +126,7 @@ export default function PartnerDashboard() {
               </span>
             )}
             <Link
-              href="/partner/add-property"
+              href="/rent/pg"
               className="flex items-center gap-1.5 bg-green-800 hover:bg-green-900 text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
             >
               <Plus size={13} />
@@ -223,7 +225,7 @@ export default function PartnerDashboard() {
               </div>
               <p className="text-sm text-gray-500">No properties listed yet.</p>
               <Link
-                href="/partner/add-property"
+                href="/rent/pg"
                 className="text-xs text-green-800 font-medium hover:underline flex items-center gap-1"
               >
                 <Plus size={12} /> Add your first property
@@ -257,9 +259,17 @@ export default function PartnerDashboard() {
                       <span className="text-sm font-semibold text-gray-800 truncate">
                         {property.name}
                       </span>
-                      {property.isVerified && (
-                        <span className="text-[10px] font-medium text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                      {property.status === "REJECTED" ? (
+                        <span className="text-[10px] font-medium text-red-700 bg-red-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border border-red-100">
+                          <ShieldCheck size={9} /> Rejected
+                        </span>
+                      ) : property.isVerified ? (
+                        <span className="text-[10px] font-medium text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border border-blue-100">
                           <ShieldCheck size={9} /> Verified
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border border-amber-100">
+                          <ShieldCheck size={9} /> Pending
                         </span>
                       )}
                       {property.isBoosted && (
@@ -284,6 +294,18 @@ export default function PartnerDashboard() {
                         <TrendingUp size={10} /> SEO {property.seoScore}
                       </span>
                     </div>
+
+                    {property.status === "REJECTED" && property.rejectionReason && (
+                      <div className="mt-2.5 bg-red-50/80 border border-red-100 rounded-lg p-2 flex gap-2 w-full max-w-sm">
+                        <div className="text-red-500 mt-0.5 shrink-0">
+                          <ShieldCheck size={12} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-red-800">Action Required: Update Listing</p>
+                          <p className="text-[10px] text-red-700 mt-0.5 leading-snug">{property.rejectionReason}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Rent + Actions */}

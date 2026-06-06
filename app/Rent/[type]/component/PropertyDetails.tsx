@@ -10,6 +10,7 @@ import {
   Check,
 } from "lucide-react";
 
+
 interface FormData {
   pgName: string;
   sector: string;
@@ -18,28 +19,32 @@ interface FormData {
   contact: string;
   latitude: number;
   longitude: number;
+  description: string;
 }
 
 export default function PropertyDetails({
+  Property,
   setProperty,
   setflowno,
 }: {
+  Property: any;
   setProperty: any;
   setflowno: any;
 }) {
   const [form, setForm] = useState<FormData>({
-    pgName: "",
-    sector: "",
-    street: "",
-    area: "",
-    contact: "",
-    latitude: 0,
-    longitude: 0,
+    pgName: Property?.name || "",
+    sector: Property?.sector || "",
+    street: Property?.street || "",
+    area: Property?.area || "",
+    contact: Property?.phone || "",
+    latitude: Property?.latitude || 0,
+    longitude: Property?.longitude || 0,
+    description: Property?.description || "",
   });
 
   const set =
     (key: keyof FormData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((prev) => ({
         ...prev,
         [key]: e.target.value,
@@ -56,9 +61,27 @@ export default function PropertyDetails({
       phone: form.contact,
       latitude: form.latitude,
       longitude: form.longitude,
+      description: form.description,
     }));
 
     setflowno((prev: number) => prev + 1);
+  };
+
+  const handleBack = () => {
+    // Optionally save state when going back
+    setProperty((prev: any) => ({
+      ...prev,
+      name: form.pgName,
+      sector: form.sector,
+      street: form.street,
+      area: form.area,
+      location: form.area,
+      phone: form.contact,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      description: form.description,
+    }));
+    setflowno((prev: number) => prev - 1);
   };
 
   return (
@@ -76,7 +99,7 @@ export default function PropertyDetails({
           </h1>
 
           <p className="mt-1.5 text-xs text-slate-500 max-w-xl">
-            Fill in your PG information so students and professionals can
+            Fill in your information so students and professionals can
             discover your property easily.
           </p>
         </div>
@@ -84,10 +107,10 @@ export default function PropertyDetails({
         {/* Main Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
           <div className="grid grid-cols-1 gap-4">
-            {/* PG Name */}
+            
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                Property / PG Name
+                Property
               </label>
 
               <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
@@ -186,31 +209,26 @@ export default function PropertyDetails({
               </div>
             </div>
 
-            {/* Location Preview */}
-            {form.area && (
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
-                <div className="flex items-start gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-emerald-700 shadow-sm shrink-0">
-                    <MapPin size={14} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-emerald-900">
-                      Selected Location
-                    </p>
-                    <p className="mt-0.5 text-xs text-emerald-700 break-words">
-                      {form.area}
-                    </p>
-                  </div>
-                </div>
+            {/* Description */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                Property Description
+              </label>
+              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 transition-all focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-emerald-100">
+                <textarea
+                  rows={4}
+                  placeholder="Tell us a bit about your property (amenities, nearby landmarks, atmosphere)..."
+                  value={form.description}
+                  onChange={set("description")}
+                  className="flex-1 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 resize-none"
+                />
               </div>
-            )}
-
+            </div>
             {/* Footer */}
             <div className="mt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setflowno((prev: number) => prev - 1)}
+                onClick={handleBack}
                 className="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-all"
               >
                 Back

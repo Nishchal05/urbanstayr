@@ -6,11 +6,6 @@ export default function RentYourProperty() {
   type MainOption = "search" | "sell" | "buy" | "pg";
   const [mainOption, setMainOption] = useState<MainOption | null>(null);
 
-  const SearchIcon = () => (
-    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-    </svg>
-  );
   const HomeIcon = () => (
     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
