@@ -3,9 +3,10 @@
 import { Mail, Lock, LogIn } from "lucide-react";
 import { useState } from "react";
 import axios from "axios";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function EmployeeLoginPage() {
+  const router = useRouter();
 
   const [form, setForm] = useState({
     email: "",
@@ -34,9 +35,8 @@ export default function EmployeeLoginPage() {
         "/api/auth/admin/login",
         form
       );
-
       if (response.data.message === "Login successful") {
-        redirect("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
       }
     } catch (error: any) {
       console.error(error);
@@ -123,7 +123,7 @@ export default function EmployeeLoginPage() {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => redirect("/employee/forgot-password")}
+                onClick={() => router.push("/employee/forgot-password")}
                 className="text-sm text-blue-300 hover:text-blue-200 transition cursor-pointer"
               >
                 Forgot Password?

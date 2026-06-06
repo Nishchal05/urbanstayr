@@ -9,8 +9,6 @@ export async function POST(request:Request){
         if(!email || !password){
             return NextResponse.json({message:"Please provide all the required fields"}, {status:400});
         }
-        console.log("emial",email)
-        console.log("password",password)
         const user = await prisma.employ.findUnique({
             where: {
                     companyEmail: email
@@ -24,13 +22,14 @@ export async function POST(request:Request){
         if(!isPasswordMatched){
             return NextResponse.json({message:"Invalid password"}, {status:401});
         }
+
         const token = await createToken({
               userId: user.employid,
               email: user.companyEmail,
               name: user.name,
               role: user.role,
             });
-        const response=NextResponse.json({message:"Login successful", user});
+        const response=NextResponse.json({message:"Login successful"});
         response.cookies.set('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
