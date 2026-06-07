@@ -15,9 +15,7 @@ export async function POST(request: Request) {
         if (!propertyId || !feedback) {
             return NextResponse.json({message:"Property ID and feedback are required"}, {status:400});
         }
-        console.log(`Rejection Feedback for property ${propertyId}:`, feedback);
         
-        // Update the property status and reason
         const updatedProperty = await prisma.property.update({
             where: { id: Number(propertyId) },
             data: {

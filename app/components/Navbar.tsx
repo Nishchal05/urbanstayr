@@ -184,7 +184,7 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-1 pr-1 shrink-0">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-full hover:bg-green-100"
+            className="p-2 rounded-full hover:bg-green-100 text-black"
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -199,7 +199,7 @@ export default function Navbar() {
               <Link
                 href="/partner/dashboard"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-black"
               >
                 <LayoutDashboardIcon size={18} />
                 Dashboard
@@ -212,17 +212,17 @@ export default function Navbar() {
                   setMenuOpen(false);
                   handleLogout();
                 }}
-                className="text-white bg-red-600 px-5 py-2.5 rounded-full"
+                className="text-red bg-red-600 px-5 py-2.5 rounded-full"
               >
                 Logout
               </button>
             ) : (
               <>
-                <Link href="/Login" onClick={() => setMenuOpen(false)}>
+                <Link href="/Login" className="text-black" onClick={() => setMenuOpen(false)}>
                   Login
                 </Link>
 
-                <Link href="/Signup" onClick={() => setMenuOpen(false)}>
+                <Link href="/Signup" className="text-black" onClick={() => setMenuOpen(false)}>
                   Register
                 </Link>
               </>
