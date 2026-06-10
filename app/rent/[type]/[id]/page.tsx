@@ -124,15 +124,8 @@ export default function PropertyDetail() {
     };
 
     const menuUrl = getMenuUrl(property.menu);
-
     return (
         <main className="min-h-screen bg-gray-50 pb-24 lg:pb-12">
-            {/* Partner Dashboard Banner */}
-            <div className="bg-amber-600 text-white text-center py-2 text-sm font-semibold tracking-wide flex items-center justify-center gap-2">
-                <Info size={16} /> Partner View - This is how your property appears to users
-            </div>
-
-            {/* Top Navigation */}
             <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 px-4 py-3 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl flex items-center justify-between">
                     <button 
@@ -199,8 +192,6 @@ export default function PropertyDetail() {
                             />
                         ))}
                     </div>
-                    
-                    {/* Badges overlay */}
                     <div className="absolute left-4 top-4 flex flex-col gap-2 pointer-events-none">
                         {property.isBoosted && (
                             <span className="flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-1 text-xs font-bold text-white shadow-md">
@@ -310,8 +301,9 @@ export default function PropertyDetail() {
                                         Food & Dining
                                     </h2>
                                     {menuUrl && (
+                                        
                                         <a 
-                                            href={menuUrl} 
+                                            href={menuUrl}
                                             target="_blank" 
                                             rel="noopener noreferrer"
                                             className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-700 hover:bg-orange-100 rounded-xl font-medium transition text-sm border border-orange-200"
@@ -396,12 +388,13 @@ export default function PropertyDetail() {
                             </div>
 
                             <button 
+                            onClick={()=>router.push(`/rent/edit/${property.listingType}/${id}`)}
                                 className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-2xl transition shadow-md shadow-amber-600/20 active:scale-[0.98]"
                             >
                                 <Info size={20} />
-                                Edit Property (Coming Soon)
+                                Edit Property 
                             </button>
-                            <p className="text-center text-xs text-gray-400 mt-4 font-medium">You won't be charged yet</p>
+                
                         </div>
                     </div>
 

@@ -16,12 +16,14 @@ interface PropertyPricingProps {
   Property: any;
   setProperty: any;
   setflowno: any;
+  reqtype?: string;
 }
 
 export default function PropertyPricing({
   Property = {},
   setProperty,
   setflowno,
+  reqtype,
 }: PropertyPricingProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -62,8 +64,14 @@ export default function PropertyPricing({
         setError("Please enter monthly rent");
         return;
       }
-
-      setLoading(true);
+      if(reqtype === "update"){
+        const formData=createFormData();
+        const res=await axios.put(`/api/partner/property/${Property?.id}`,formData);
+        if(res.status>=200 && res.status<300){
+          setflowno((prev: number) => prev + 2);
+        }
+      }else{
+        setLoading(true);
 
       const subscriptionResponse = await axios.get("/api/partner/subscription");
 
@@ -79,12 +87,15 @@ export default function PropertyPricing({
       } else {
         setflowno((prev: number) => prev + 1);
       }
-    } catch (error: any) {
+    } 
+      }
+catch (error: any) {
       console.error("Submission failed", error);
       setError(
         error?.response?.data?.message || "Something went wrong. Please try again."
       );
-    } finally {
+    }
+       finally {
       setLoading(false);
     }
   };

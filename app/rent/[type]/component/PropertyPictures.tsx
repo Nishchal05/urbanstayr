@@ -119,7 +119,10 @@ export default function PropertyPictures({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {pictureCategories.map((item) => {
               const Icon = item.icon;
-              const uploadedFiles = Property?.[item.key] || [];
+              let rawFiles = Property?.[item.key];
+              if (!rawFiles) rawFiles = [];
+              if (typeof rawFiles === "string") rawFiles = [rawFiles];
+              const uploadedFiles = Array.isArray(rawFiles) ? rawFiles : [];
               const hasFiles = uploadedFiles.length > 0;
 
               return (
@@ -200,7 +203,7 @@ export default function PropertyPictures({
                     </div>
 
                     <p className="mt-2 text-xs font-semibold text-slate-700">
-                      {hasFiles ? "Add More" : "Upload"}
+                      {hasFiles ? "Change/Upload" : "Upload"}
                     </p>
 
                     <p className="mt-1 text-xs text-slate-500">
@@ -219,14 +222,18 @@ export default function PropertyPictures({
                       <div className="mt-2 space-y-1">
                         {uploadedFiles
                           .slice(0, 2)
-                          .map((file: File, index: number) => (
-                            <p
-                              key={index}
-                              className="truncate text-xs text-slate-500"
-                            >
-                              {file.name}
-                            </p>
-                          ))}
+                          .map((file: any, index: number) => {
+                            const isString = typeof file === "string";
+                            const name = isString ? file.split("/").pop() : file.name;
+                            return (
+                              <p
+                                key={index}
+                                className="truncate text-xs text-slate-500"
+                              >
+                                {name}
+                              </p>
+                            );
+                          })}
 
                         {uploadedFiles.length > 2 && (
                           <p className="text-xs text-emerald-700">

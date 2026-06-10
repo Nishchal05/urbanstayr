@@ -10,11 +10,12 @@ import PropertyPricing from "./PropertyPricing";
 import Pricing from "@/app/components/Pricing";
 import PropertySubmit from "./PropertySubmit";
 import Propertytype from "./Propertytype";
-export default function () {
+export default function (props: { Property?: any,reqtype?:string}) {
     const params = useParams();
     const type = typeof params?.type === "string" ? params.type : "";
 
     const [flowno, setflowno] = useState<number>(0);
+    const reqtype=props?.reqtype || "add";
     const [form, setform] = useState<any>({
         propertyType: "",
         name: "",
@@ -54,6 +55,26 @@ export default function () {
         listingType: type,
 
     });
+    react.useEffect(() => {
+        if (props?.Property && Object.keys(props.Property).length > 0) {
+            setform((prev: any) => ({
+                ...prev,
+                ...props.Property,
+                amenities: {
+                    ac: props.Property.ac || false,
+                    cooler: props.Property.cooler || false,
+                    table: props.Property.table || false,
+                    chair: props.Property.chair || false,
+                    attachedBathroom: props.Property.attachedBathroom || false,
+                    housekeeping: props.Property.housekeeping || false,
+                    washingMachine: props.Property.washingMachine || false,
+                    parking: props.Property.parking || false,
+                    kitchenAccess: props.Property.kitchen || false,
+                }
+            }));
+            setflowno(0);
+        }
+    }, [props?.Property]);
     return (
         <section>
             {flowno == 0 && <Propertytype  setProperty={setform} setflowno={setflowno} />}
@@ -62,9 +83,9 @@ export default function () {
             {flowno == 3 && <RoomDetails  Property={form} setProperty={setform} setflowno={setflowno} />}
             {flowno == 4 && <Food Property={form} setProperty={setform} setflowno={setflowno} />}
             {flowno == 5 && <PropertyPictures Property={form} setProperty={setform} setflowno={setflowno} />}
-            {flowno == 6 && <PropertyPricing Property={form} setProperty={setform} setflowno={setflowno} />}
+            {flowno == 6 && <PropertyPricing Property={form} setProperty={setform} setflowno={setflowno} reqtype={reqtype} />}
             {flowno == 7 && <Pricing Property={form} setflowno={setflowno} />}
-            {flowno > 7 && <PropertySubmit/>}
+            {flowno > 7 && <PropertySubmit />}
         </section>
     )
 }
